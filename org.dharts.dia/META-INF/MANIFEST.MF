@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Document Image Model
+Bundle-SymbolicName: org.dharts.dia
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Digital Archives, Research & Technology Services
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Export-Package: org.dharts.dia,
+ org.dharts.dia.json,
+ org.dharts.dia.props

@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Tesseract
+Bundle-SymbolicName: org.dharts.dia.tesseract
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Digital Archives, Research & Technology Services
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: org.apache.log4j,
+ org.dharts.config.params,
+ org.dharts.dia,
+ org.dharts.dia.json,
+ org.dharts.dia.props
+Export-Package: org.dharts.dia.tesseract,
+ org.dharts.dia.tesseract.model,
+ org.dharts.dia.tesseract.tess4j
