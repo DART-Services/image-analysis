@@ -72,7 +72,8 @@ public class BasicModelNode<I extends PageItem> implements PageModelNode<I> {
         return item;
     }
     
-    public Class<I> getItemType() {
+    @Override
+	public Class<I> getItemType() {
         return type;
     }
 
@@ -89,7 +90,7 @@ public class BasicModelNode<I extends PageItem> implements PageModelNode<I> {
                 new ArrayList<PageModelNode<?>>(children));
     }
 
-    public <X extends PageItem> boolean add(X child, Class<X> type, Level childLevel)
+    public <X extends PageItem> boolean add(X child, Class<X> childType, Level childLevel)
     {
         // Assume that children are added in reading order. 
         
@@ -100,14 +101,14 @@ public class BasicModelNode<I extends PageItem> implements PageModelNode<I> {
             return false;
         
         if (level.isAcceptableChild(childLevel)) {
-            children.add(BasicModelNode.create(child, type, childLevel));
+            children.add(BasicModelNode.create(child, childType, childLevel));
             return true;
         } 
         
         if (level.isAcceptableDescendant(childLevel)) {
             // Chain of responsibility: process children in page order and add to the first descendant that accepts it.
             for (BasicModelNode<?> childNode : children) {
-                if (childNode.add(child, type, childLevel))
+                if (childNode.add(child, childType, childLevel))
                     return true;
             }
         }

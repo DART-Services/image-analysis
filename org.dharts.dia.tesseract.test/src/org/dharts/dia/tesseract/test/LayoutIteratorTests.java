@@ -39,8 +39,6 @@ import org.junit.Test;
  */
 public class LayoutIteratorTests extends TesseractTestFixture {
     
-    TesseractLevelCatalog levels = TesseractLevelCatalog.getInstance();
-    
     @Test
     public void testPageIteratorCloning() throws IOException, TesseractException, PageModelException {
         ImageAnalyzer analyzer = getImageAnalyzer(poetryImageFile);

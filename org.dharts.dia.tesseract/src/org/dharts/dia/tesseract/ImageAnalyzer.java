@@ -23,7 +23,7 @@ import java.awt.image.BufferedImage;
 
 /**
  * Used to retrieve the recognition results from a single image. This class can be used to 
- * perform both layout analysis (using <code>{@link #analyzeLayout()}</code>) both character
+ * perform both layout analysis (using <code>{@link #analyzeLayout()}</code>) and character
  * recognition (using <code>{@link #recognize()}</code>). Both analysis and recognition 
  * results can be performed on either the entire image or a select region of interest using 
  * the single parameter version of these methods. The analyzer can be called multiple times

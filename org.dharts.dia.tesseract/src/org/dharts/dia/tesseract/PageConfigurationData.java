@@ -60,7 +60,7 @@ public class PageConfigurationData {
     void configure(ImageAnalyzerFactory factory, ImageAnalyzer analyzer) throws TesseractException {
         // source resolution needs to be specified after the image is set
         if (ppi != null) {
-            factory.handle.setSourceResolution(ppi);
+            factory.handle.setSourceResolution(ppi.intValue());
         }
     }
     
@@ -94,7 +94,7 @@ public class PageConfigurationData {
          * @return A reference to this builder to facilitate fluid programming.
          */
         public PageConfigurationDataBuilder setPageResolution(int ppi) {
-            this.ppi = ppi;
+            this.ppi = Integer.valueOf(ppi);
             return this;
         }
         

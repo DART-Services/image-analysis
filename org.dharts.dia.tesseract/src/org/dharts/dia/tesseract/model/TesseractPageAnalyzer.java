@@ -88,12 +88,11 @@ public class TesseractPageAnalyzer {
         }
     }
 
-    private <X extends PageItem> void process(LayoutIterator layout, Page pageModel, 
-                                              PageItemFactory<X> factory) 
+    private <X extends PageItem> void process(LayoutIterator layout, Page pageModel, PageItemFactory<X> pageItemFactory) 
     {
-        PageItemIterator<X> iterator = new TessPageItemIterator<>(layout, factory);
+        PageItemIterator<X> iterator = new TessPageItemIterator<>(layout, pageItemFactory);
         while (iterator.hasNext()) {
-            pageModel.add(iterator.next(), factory.getType(), factory.getLevel());
+            pageModel.add(iterator.next(), pageItemFactory.getType(), pageItemFactory.getLevel());
         }
     }
 

@@ -28,9 +28,9 @@ import org.dharts.dia.tesseract.model.Page;
  * @author Neal Audenaert
  */
 public class JsonPage {
+    @SuppressWarnings("unused")
+	private List<PageModelNode<?>> roots;
     BoundingBox box;
-    private List<PageModelNode<?>> roots;
-    
     
     /** Invoked by JSON parser. */
     JsonPage() {

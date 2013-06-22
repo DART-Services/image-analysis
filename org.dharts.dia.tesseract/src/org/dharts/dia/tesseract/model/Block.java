@@ -88,7 +88,7 @@ public class Block implements PageItem {
             params.set(ORIENTATION, orientation.orientation);
             params.set(WRITING_DIRECTION, orientation.writingDirection);
             params.set(TEXTLINE_ORDER, orientation.textlineOrder);
-            params.set(DESKEW_ANGLE, orientation.deskewAnge);
+            params.set(DESKEW_ANGLE, Float.valueOf(orientation.deskewAnge));
         } 
         catch (Exception ex)
         {

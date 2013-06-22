@@ -103,7 +103,7 @@ public abstract class JsonModelNodeProxy<T extends JsonItemProxy> {
             throw new IllegalStateException("Cannot restore node level [" + levelName + "]", e);
         }
         
-        X item = getItem().toItem(itemType);
-        return BasicModelNode.create(item, itemType, level, seqNo);
+        X pageItem = getItem().toItem(itemType);
+        return BasicModelNode.create(pageItem, itemType, level, seqNo);
     }
 }

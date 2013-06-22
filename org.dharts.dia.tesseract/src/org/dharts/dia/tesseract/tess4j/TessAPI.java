@@ -59,10 +59,10 @@ public interface TessAPI extends Library {
      */
     public static interface TessOcrEngineMode {
 
-        public static final int OEM_TESSERACT_ONLY = (int) 0;
-        public static final int OEM_CUBE_ONLY = (int) 1;
-        public static final int OEM_TESSERACT_CUBE_COMBINED = (int) 2;
-        public static final int OEM_DEFAULT = (int) 3;
+        public static final int OEM_TESSERACT_ONLY = 0;
+        public static final int OEM_CUBE_ONLY = 1;
+        public static final int OEM_TESSERACT_CUBE_COMBINED = 2;
+        public static final int OEM_DEFAULT = 3;
     };
 
     /**
@@ -72,18 +72,18 @@ public interface TessAPI extends Library {
      */
     public static interface TessPageSegMode {
 
-        public static final int PSM_OSD_ONLY = (int) 0;
-        public static final int PSM_AUTO_OSD = (int) 1;
-        public static final int PSM_AUTO_ONLY = (int) 2;
-        public static final int PSM_AUTO = (int) 3;
-        public static final int PSM_SINGLE_COLUMN = (int) 4;
-        public static final int PSM_SINGLE_BLOCK_VERT_TEXT = (int) 5;
-        public static final int PSM_SINGLE_BLOCK = (int) 6;
-        public static final int PSM_SINGLE_LINE = (int) 7;
-        public static final int PSM_SINGLE_WORD = (int) 8;
-        public static final int PSM_CIRCLE_WORD = (int) 9;
-        public static final int PSM_SINGLE_CHAR = (int) 10;
-        public static final int PSM_COUNT = (int) 11;
+        public static final int PSM_OSD_ONLY = 0;
+        public static final int PSM_AUTO_OSD = 1;
+        public static final int PSM_AUTO_ONLY = 2;
+        public static final int PSM_AUTO = 3;
+        public static final int PSM_SINGLE_COLUMN = 4;
+        public static final int PSM_SINGLE_BLOCK_VERT_TEXT = 5;
+        public static final int PSM_SINGLE_BLOCK = 6;
+        public static final int PSM_SINGLE_LINE = 7;
+        public static final int PSM_SINGLE_WORD = 8;
+        public static final int PSM_CIRCLE_WORD = 9;
+        public static final int PSM_SINGLE_CHAR = 10;
+        public static final int PSM_COUNT = 11;
     };
 
     /**
@@ -93,29 +93,29 @@ public interface TessAPI extends Library {
      */
     public static interface TessPageIteratorLevel {
 
-        public static final int RIL_BLOCK = (int) 0;
-        public static final int RIL_PARA = (int) 1;
-        public static final int RIL_TEXTLINE = (int) 2;
-        public static final int RIL_WORD = (int) 3;
-        public static final int RIL_SYMBOL = (int) 4;
+        public static final int RIL_BLOCK = 0;
+        public static final int RIL_PARA = 1;
+        public static final int RIL_TEXTLINE = 2;
+        public static final int RIL_WORD = 3;
+        public static final int RIL_SYMBOL = 4;
     };
 
     public static interface TessPolyBlockType {
 
-        public static final int PT_UNKNOWN = (int) 0;
-        public static final int PT_FLOWING_TEXT = (int) 1;
-        public static final int PT_HEADING_TEXT = (int) 2;
-        public static final int PT_PULLOUT_TEXT = (int) 3;
-        public static final int PT_TABLE = (int) 4;
-        public static final int PT_VERTICAL_TEXT = (int) 5;
-        public static final int PT_CAPTION_TEXT = (int) 6;
-        public static final int PT_FLOWING_IMAGE = (int) 7;
-        public static final int PT_HEADING_IMAGE = (int) 8;
-        public static final int PT_PULLOUT_IMAGE = (int) 9;
-        public static final int PT_HORZ_LINE = (int) 10;
-        public static final int PT_VERT_LINE = (int) 11;
-        public static final int PT_NOISE = (int) 12;
-        public static final int PT_COUNT = (int) 13;
+        public static final int PT_UNKNOWN = 0;
+        public static final int PT_FLOWING_TEXT = 1;
+        public static final int PT_HEADING_TEXT = 2;
+        public static final int PT_PULLOUT_TEXT = 3;
+        public static final int PT_TABLE = 4;
+        public static final int PT_VERTICAL_TEXT = 5;
+        public static final int PT_CAPTION_TEXT = 6;
+        public static final int PT_FLOWING_IMAGE = 7;
+        public static final int PT_HEADING_IMAGE = 8;
+        public static final int PT_PULLOUT_IMAGE = 9;
+        public static final int PT_HORZ_LINE = 10;
+        public static final int PT_VERT_LINE = 11;
+        public static final int PT_NOISE = 12;
+        public static final int PT_COUNT = 13;
     };
 
     /**
@@ -157,10 +157,10 @@ public interface TessAPI extends Library {
      */
     public static interface TessOrientation {
 
-        public static final int ORIENTATION_PAGE_UP = (int) 0;
-        public static final int ORIENTATION_PAGE_RIGHT = (int) 1;
-        public static final int ORIENTATION_PAGE_DOWN = (int) 2;
-        public static final int ORIENTATION_PAGE_LEFT = (int) 3;
+        public static final int ORIENTATION_PAGE_UP = 0;
+        public static final int ORIENTATION_PAGE_RIGHT = 1;
+        public static final int ORIENTATION_PAGE_DOWN = 2;
+        public static final int ORIENTATION_PAGE_LEFT = 3;
     };
 
     /**
@@ -172,9 +172,9 @@ public interface TessAPI extends Library {
      */
     public static interface TessWritingDirection {
 
-        public static final int WRITING_DIRECTION_LEFT_TO_RIGHT = (int) 0;
-        public static final int WRITING_DIRECTION_RIGHT_TO_LEFT = (int) 1;
-        public static final int WRITING_DIRECTION_TOP_TO_BOTTOM = (int) 2;
+        public static final int WRITING_DIRECTION_LEFT_TO_RIGHT = 0;
+        public static final int WRITING_DIRECTION_RIGHT_TO_LEFT = 1;
+        public static final int WRITING_DIRECTION_TOP_TO_BOTTOM = 2;
     };
 
     /**
@@ -188,12 +188,12 @@ public interface TessAPI extends Library {
      */
     public static interface TessTextlineOrder {
 
-        public static final int TEXTLINE_ORDER_LEFT_TO_RIGHT = (int) 0;
-        public static final int TEXTLINE_ORDER_RIGHT_TO_LEFT = (int) 1;
-        public static final int TEXTLINE_ORDER_TOP_TO_BOTTOM = (int) 2;
+        public static final int TEXTLINE_ORDER_LEFT_TO_RIGHT = 0;
+        public static final int TEXTLINE_ORDER_RIGHT_TO_LEFT = 1;
+        public static final int TEXTLINE_ORDER_TOP_TO_BOTTOM = 2;
     };
-    public static final int TRUE = (int) 1;
-    public static final int FALSE = (int) 0;
+    public static final int TRUE = 1;
+    public static final int FALSE = 0;
 
     /**
      * Returns the version identifier.

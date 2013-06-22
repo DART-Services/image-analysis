@@ -272,7 +272,7 @@ public class LayoutIterator {
      * @return the baseline of the current object at the given level. May return {@code null}
      *      if the baseline could not be obtained.
      */
-    public Baseline getBaseline(TesseractLevel level) throws TesseractException {
+    public Baseline getBaseline(TesseractLevel level) {
         IntBuffer x1 = IntBuffer.allocate(1);
         IntBuffer y1 = IntBuffer.allocate(1);
         IntBuffer x2 = IntBuffer.allocate(1);
@@ -356,7 +356,8 @@ public class LayoutIterator {
             this.y2 = y2;
         }
         
-        public String toString() {
+        @Override
+		public String toString() {
             StringBuilder sb = new StringBuilder();
             sb.append("Baseline: (")
               .append(x1).append(", ").append(y1).append(") x (")

@@ -41,7 +41,8 @@ public class AnalyzerFactoryBugs extends TesseractTestFixture {
     
     private ImageAnalyzer analyzer = null;
     
-    public void tearDown() {
+    @Override
+	public void tearDown() {
         // cleanup. This shouldn't be needed, but we'll check
         if (analyzer != null) {
             try {

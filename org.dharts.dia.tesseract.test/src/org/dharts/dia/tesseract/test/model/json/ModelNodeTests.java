@@ -72,7 +72,7 @@ public class ModelNodeTests {
         int left = x;
         int top = (int)(y + (lineHeight - height));
         int right = (int)(x + width);
-        int bottom = (int)(y + lineHeight);
+        int bottom = (y + lineHeight);
         
         BoundingBox box = new SimpleBoundingBox(left, top, right, bottom);
         

@@ -24,16 +24,8 @@ import java.util.Iterator;
 
 /**
  * @author Neal Audenaert
- *
  */
 public interface PageItemIterator<I extends PageItem> extends Iterator<I> {
 
-    boolean hasNext();
-
-    I next();
-
-    /**
-     * @throws UnsupportedOperationException Cannot remove a block from a page.
-     */
-    void remove();
+	// Constrains the type of element being iterated over. Does not add API. 
 }

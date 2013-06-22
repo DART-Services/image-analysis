@@ -119,11 +119,13 @@ public class JsonItem extends JsonItemProxy {
                 SimpleTypedMap params = new SimpleTypedMap(Block.DEFINED_PROPERTIES);
                 
                 try {
+                	float deskewAngle = getNumber(item, Block.DESKEW_ANGLE).floatValue();
+                	
                     params.set(Block.BLOCK_TYPE, getEnum(item, Block.BLOCK_TYPE));
                     params.set(Block.ORIENTATION, getEnum(item, Block.ORIENTATION));
                     params.set(Block.TEXTLINE_ORDER, getEnum(item, Block.TEXTLINE_ORDER));
                     params.set(Block.WRITING_DIRECTION, getEnum(item, Block.WRITING_DIRECTION));
-                    params.set(Block.DESKEW_ANGLE, getNumber(item, Block.DESKEW_ANGLE).floatValue());
+					params.set(Block.DESKEW_ANGLE, Float.valueOf(deskewAngle));
                     
                     return Block.create(item.getBoundingBox(), params);
                 } 

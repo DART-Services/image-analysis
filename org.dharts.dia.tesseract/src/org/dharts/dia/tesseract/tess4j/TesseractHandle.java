@@ -98,18 +98,18 @@ public class TesseractHandle {
         this.handle = api.TessBaseAPICreate();
     }
     
-    public synchronized void close() throws InvalidStateException {
+    public synchronized void close() {
         requireState(CLOSABLE_STATES);
         
         api.TessBaseAPIDelete(handle);
         state = State.CLOSED;
     }
  
-    private void requireState(State state) throws InvalidStateException {
-        requireState(Collections.singleton(state));
+    private void requireState(State s) {
+        requireState(Collections.singleton(s));
     }
     
-    private void requireState(Collection<State> states) throws InvalidStateException {
+    private void requireState(Collection<State> states) {
         boolean found = false;
         for (State s: states) {
             if (this.state == s) {
@@ -385,19 +385,19 @@ public class TesseractHandle {
      * state and changes the state of this handle to <code>State.INITIALIZED</code>.
      * 
      * @param datapath
-     * @param language
+     * @param lg
      * @param oem
      * @param configs
      * @param configs_size
      * @throws HandleClosedException If this handle has been closed.
      * @throws TesseractException
      */
-    public void init(String datapath, String language, PublicTypes.OcrEngineMode oem, 
+    public void init(String datapath, String lg, PublicTypes.OcrEngineMode oem, 
             PointerByReference configs, int configs_size) 
             throws TesseractException {
         requireState(State.UNINITIALIZED);
         
-        int success = this.api.TessBaseAPIInit1(handle, datapath, language, oem.value, configs, configs_size);
+        int success = this.api.TessBaseAPIInit1(handle, datapath, lg, oem.value, configs, configs_size);
         try {
             if (!toBoolean(success)) {
                 throw new TesseractException("Failed to initialize this handle.");
@@ -414,16 +414,16 @@ public class TesseractHandle {
      * state and changes the state of this handle to <code>State.INITIALIZED</code>.
      * 
      * @param datapath The parent of the <code>tessdata</code> directory.
-     * @param language The language or languages to be used for recognition.
+     * @param lg The language or languages to be used for recognition.
      * @param oem The OCR engine mode to use. 
      * 
      * @throws TesseractException
      */
-    public void init(String datapath, String language, PublicTypes.OcrEngineMode oem) 
+    public void init(String datapath, String lg, PublicTypes.OcrEngineMode oem) 
             throws TesseractException {
         requireState(State.UNINITIALIZED);
         
-        int success = this.api.TessBaseAPIInit2(handle, datapath, language, oem.value);
+        int success = this.api.TessBaseAPIInit2(handle, datapath, lg, oem.value);
         if (success != 0) {
             throw new TesseractException("Failed to initialize this handle.");
         }
@@ -437,14 +437,14 @@ public class TesseractHandle {
      * state and changes the state of this handle to <code>State.INITIALIZED</code>.
      * 
      * @param datapath
-     * @param language
+     * @param lg
      * @throws HandleClosedException If this handle has been closed.
      * @throws TesseractException
      */
-    public void init(String datapath, String language) throws TesseractException {
+    public void init(String datapath, String lg) throws TesseractException {
         requireState(State.UNINITIALIZED);
         
-        int success = this.api.TessBaseAPIInit3(handle, datapath, language);
+        int success = this.api.TessBaseAPIInit3(handle, datapath, lg);
         try {
             if (!toBoolean(success)) {
                 throw new TesseractException("Failed to initialize this handle.");
@@ -474,7 +474,7 @@ public class TesseractHandle {
         
     }
     
-    public String rect(BufferedImage image, Rectangle rectangle) throws InvalidStateException {
+    public String rect(BufferedImage image, Rectangle rectangle) {
         requireState(State.INITIALIZED);
         
         // FIXME this results in a memory leak since the returned string is required to be deleted
@@ -490,7 +490,7 @@ public class TesseractHandle {
     /* (non-Javadoc)
      * @see org.dharts.dia.tesseract.tess4j.TessAPI#TessBaseAPISetImage(org.dharts.dia.tesseract.tess4j.TessAPI.TessBaseAPI, java.nio.ByteBuffer, int, int, int, int)
      */
-    public void setImage(BufferedImage image) throws InvalidStateException {
+    public void setImage(BufferedImage image) {
         requireState(State.INITIALIZED);
         
         ImageStats stats = new ImageStats(image);
@@ -500,7 +500,7 @@ public class TesseractHandle {
         state = State.IMAGE_SET;
     }
 
-    public void clearImage() throws InvalidStateException {
+    public void clearImage() {
         if (state == State.INITIALIZED)
             return;     // no image set
         
@@ -513,7 +513,7 @@ public class TesseractHandle {
     /* (non-Javadoc)
      * @see org.dharts.dia.tesseract.tess4j.TessAPI#TessBaseAPISetSourceResolution(org.dharts.dia.tesseract.tess4j.TessAPI.TessBaseAPI, int)
      */
-    public void setSourceResolution(int ppi) throws InvalidStateException, InvalidParameterException {
+    public void setSourceResolution(int ppi) throws InvalidParameterException {
         requireState(State.IMAGE_SET);
         
         if (ppi < 0) {
@@ -527,7 +527,7 @@ public class TesseractHandle {
     /* (non-Javadoc)
      * @see org.dharts.dia.tesseract.tess4j.TessAPI#TessBaseAPISetRectangle(org.dharts.dia.tesseract.tess4j.TessAPI.TessBaseAPI, int, int, int, int)
      */
-    public void setRectangle(Rectangle rect) throws InvalidStateException {
+    public void setRectangle(Rectangle rect) {
         requireState(State.IMAGE_SET);
         
         api.TessBaseAPISetRectangle(handle, rect.x, rect.y, rect.width, rect.height);
@@ -536,7 +536,7 @@ public class TesseractHandle {
     /* (non-Javadoc)
      * @see org.dharts.dia.tesseract.tess4j.TessAPI#TessBaseAPIAnalyseLayout(org.dharts.dia.tesseract.tess4j.TessAPI.TessBaseAPI)
      */
-    public LayoutHandle analyseLayout() throws InvalidStateException {
+    public LayoutHandle analyseLayout() {
         // FIXME NOT THREAD SAFE (applies to most methods in class)
         requireState(State.IMAGE_SET);
         
@@ -560,7 +560,7 @@ public class TesseractHandle {
     /* (non-Javadoc)
      * @see org.dharts.dia.tesseract.tess4j.TessAPI#TessBaseAPIGetIterator(org.dharts.dia.tesseract.tess4j.TessAPI.TessBaseAPI)
      */
-    public ResultHandle recognize() throws InvalidStateException {
+    public ResultHandle recognize() {
         // FIXME NOT THREAD SAFE
         requireState(State.IMAGE_SET);
         
@@ -606,18 +606,22 @@ public class TesseractHandle {
             super(base);
         }
         
-        protected TessPageIterator doCopy(TessPageIterator handle) {
-            return api.TessPageIteratorCopy(handle);
+        @Override
+		protected TessPageIterator doCopy(TessPageIterator h) {
+            return api.TessPageIteratorCopy(h);
         }
         
-        protected void doClose(TessPageIterator handle) {
-            api.TessPageIteratorDelete(handle);
+        @Override
+        protected void doClose(TessPageIterator h) {
+            api.TessPageIteratorDelete(h);
         }
         
+        @Override
         protected TessAPI getAPI() {
             return api;
         }
         
+        @Override
         protected void release() {
             TesseractHandle.this.state = State.IMAGE_SET;
         }
@@ -629,20 +633,24 @@ public class TesseractHandle {
             super(base);
         }
         
-        protected TessResultIterator doCopy(TessResultIterator handle) {
+        @Override
+        protected TessResultIterator doCopy(TessResultIterator h) {
             // TODO guard state
-            return api.TessResultIteratorCopy(handle);
+            return api.TessResultIteratorCopy(h);
         }
         
-        protected void doClose(TessResultIterator handle) {
+        @Override
+        protected void doClose(TessResultIterator h) {
             // TODO guard state
-            api.TessResultIteratorDelete(handle);
+            api.TessResultIteratorDelete(h);
         }
         
+        @Override
         protected TessAPI getAPI() {
             return api;
         }
         
+        @Override
         protected void release() {
             TesseractHandle.this.state = State.IMAGE_SET;
         }

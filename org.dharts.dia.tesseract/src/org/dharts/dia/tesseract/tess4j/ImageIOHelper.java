@@ -84,40 +84,42 @@ public class ImageIOHelper {
             throw new RuntimeException("Need to install JAI Image I/O package.\nhttps://jai-imageio.dev.java.net");
         }
 
-        ImageInputStream iis = ImageIO.createImageInputStream(imageFile);
-        reader.setInput(iis);
-        //Read the stream metadata
-//        IIOMetadata streamMetadata = reader.getStreamMetadata();
+        try (ImageInputStream iis = ImageIO.createImageInputStream(imageFile))
+        {
+        	reader.setInput(iis);
+        	//Read the stream metadata
+        	//        IIOMetadata streamMetadata = reader.getStreamMetadata();
 
-        //Set up the writeParam
-        TIFFImageWriteParam tiffWriteParam = new TIFFImageWriteParam(Locale.US);
-        tiffWriteParam.setCompressionMode(ImageWriteParam.MODE_DISABLED);
+        	//Set up the writeParam
+        	TIFFImageWriteParam tiffWriteParam = new TIFFImageWriteParam(Locale.US);
+        	tiffWriteParam.setCompressionMode(ImageWriteParam.MODE_DISABLED);
 
-        //Get tif writer and set output to file
-        Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName(TIFF_FORMAT);
-        ImageWriter writer = writers.next();
+        	//Get tif writer and set output to file
+        	Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName(TIFF_FORMAT);
+        	ImageWriter writer = writers.next();
 
-        //Read the stream metadata
-        IIOMetadata streamMetadata = writer.getDefaultStreamMetadata(tiffWriteParam);
+        	//Read the stream metadata
+        	IIOMetadata streamMetadata = writer.getDefaultStreamMetadata(tiffWriteParam);
 
-        int imageTotal = reader.getNumImages(true);
+        	int imageTotal = reader.getNumImages(true);
 
-        for (int i = 0; i < imageTotal; i++) {
-            // all if index == -1; otherwise, only index-th
-            if (index == -1 || i == index) {
-//                BufferedImage bi = reader.read(i);
-//                IIOImage oimage = new IIOImage(bi, null, reader.getImageMetadata(i));
-                IIOImage oimage = reader.readAll(i, reader.getDefaultReadParam());
-                File tiffFile = File.createTempFile(OUTPUT_FILE_NAME, TIFF_EXT);
-                ImageOutputStream ios = ImageIO.createImageOutputStream(tiffFile);
-                writer.setOutput(ios);
-                writer.write(streamMetadata, oimage, tiffWriteParam);
-                ios.close();
-                tiffFiles.add(tiffFile);
-            }
+        	for (int i = 0; i < imageTotal; i++) {
+        		// all if index == -1; otherwise, only index-th
+        		if (index == -1 || i == index) {
+        			//                BufferedImage bi = reader.read(i);
+        			//                IIOImage oimage = new IIOImage(bi, null, reader.getImageMetadata(i));
+        			IIOImage oimage = reader.readAll(i, reader.getDefaultReadParam());
+        			File tiffFile = File.createTempFile(OUTPUT_FILE_NAME, TIFF_EXT);
+        			ImageOutputStream ios = ImageIO.createImageOutputStream(tiffFile);
+        			writer.setOutput(ios);
+        			writer.write(streamMetadata, oimage, tiffWriteParam);
+        			ios.close();
+        			tiffFiles.add(tiffFile);
+        		}
+        	}
+        	writer.dispose();
+        	reader.dispose();
         }
-        writer.dispose();
-        reader.dispose();
 
         return tiffFiles;
     }
@@ -229,15 +231,19 @@ public class ImageIOHelper {
         IIOMetadata streamMetadata = writer.getDefaultStreamMetadata(tiffWriteParam);
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        ImageOutputStream ios = ImageIO.createImageOutputStream(outputStream);
-        writer.setOutput(ios);
-        writer.write(streamMetadata, new IIOImage(image.getRenderedImage(), null, null), tiffWriteParam);
-//        writer.write(image.getRenderedImage());
-        writer.dispose();
-//        ImageIO.write(image.getRenderedImage(), "tiff", ios); // this can be used in lieu of writer
-        ios.seek(0);
-        BufferedImage bi = ImageIO.read(ios);
-        return convertImageData(bi);
+        try (ImageOutputStream ios = ImageIO.createImageOutputStream(outputStream))
+        {
+        	IIOImage img = new IIOImage(image.getRenderedImage(), null, null);
+        	
+	        writer.setOutput(ios);
+			writer.write(streamMetadata, img, tiffWriteParam);
+	        writer.dispose();
+	//        ImageIO.write(image.getRenderedImage(), "tiff", ios); // this can be used in lieu of writer
+	        
+	        ios.seek(0);
+	        BufferedImage bi = ImageIO.read(ios);
+	        return convertImageData(bi);
+        }
     }
 
     /**
@@ -270,9 +276,6 @@ public class ImageIOHelper {
     public static List<IIOImage> getIIOImageList(File imageFile) throws IOException {
         File workingTiffFile = null;
 
-        ImageReader reader = null;
-        ImageInputStream iis = null;
-
         try {
             // convert PDF to TIFF
             if (imageFile.getName().toLowerCase().endsWith(".pdf")) {
@@ -281,50 +284,49 @@ public class ImageIOHelper {
 //                imageFile = workingTiffFile;
             }
 
+            ImageReader reader = getImageReader(imageFile);
             List<IIOImage> iioImageList = new ArrayList<IIOImage>();
-
-            String imageFileName = imageFile.getName();
-            String imageFormat = imageFileName.substring(imageFileName.lastIndexOf('.') + 1);
-            if (imageFormat.matches("(pbm|pgm|ppm)")) {
-                imageFormat = "pnm";
-            } else if (imageFormat.equals("jp2")) {
-                imageFormat = "jpeg2000";
+            try (ImageInputStream iis = ImageIO.createImageInputStream(imageFile))
+            {
+	            reader.setInput(iis);
+	
+	            int imageTotal = reader.getNumImages(true);
+	            for (int i = 0; i < imageTotal; i++) {
+	//                IIOImage oimage = new IIOImage(reader.read(i), null, reader.getImageMetadata(i));
+	                IIOImage oimage = reader.readAll(i, reader.getDefaultReadParam());
+	                iioImageList.add(oimage);
+	            }
+            } 
+            finally 
+            {
+            	if (reader != null)
+            		reader.dispose();
             }
-            Iterator<ImageReader> readers = ImageIO.getImageReadersByFormatName(imageFormat);
-            reader = readers.next();
-
-            if (reader == null) {
-                throw new RuntimeException("Need to install JAI Image I/O package.\nhttps://jai-imageio.dev.java.net");
-            }
-
-            iis = ImageIO.createImageInputStream(imageFile);
-            reader.setInput(iis);
-
-            int imageTotal = reader.getNumImages(true);
-
-            for (int i = 0; i < imageTotal; i++) {
-//                IIOImage oimage = new IIOImage(reader.read(i), null, reader.getImageMetadata(i));
-                IIOImage oimage = reader.readAll(i, reader.getDefaultReadParam());
-                iioImageList.add(oimage);
-            }
-
+            
             return iioImageList;
         } finally {
-            try {
-                if (iis != null) {
-                    iis.close();
-                }
-                if (reader != null) {
-                    reader.dispose();
-                }
-            } catch (Exception e) {
-                // ignore
-            }
             if (workingTiffFile != null && workingTiffFile.exists()) {
                 workingTiffFile.delete();
             }
         }
     }
+
+	private static ImageReader getImageReader(File imageFile) {
+		String imageFileName = imageFile.getName();
+		String imageFormat = imageFileName.substring(imageFileName.lastIndexOf('.') + 1);
+		if (imageFormat.matches("(pbm|pgm|ppm)")) {
+		    imageFormat = "pnm";
+		} else if (imageFormat.equals("jp2")) {
+		    imageFormat = "jpeg2000";
+		}
+		
+		Iterator<ImageReader> readers = ImageIO.getImageReadersByFormatName(imageFormat);
+		ImageReader reader = readers.next();
+
+		if (reader == null) 
+		    throw new RuntimeException("Need to install JAI Image I/O package.\nhttps://jai-imageio.dev.java.net");
+		return reader;
+	}
 
     /**
      * Merges multiple images into one TIFF image.
@@ -386,7 +388,7 @@ public class ImageIOHelper {
             int dpiX;
             if (nodes.getLength() > 0) {
                 float dpcWidth = Float.parseFloat(nodes.item(0).getAttributes().item(0).getNodeValue());
-                dpiX = (int) Math.round(25.4f / dpcWidth);
+                dpiX = Math.round(25.4f / dpcWidth);
             } else {
                 dpiX = Toolkit.getDefaultToolkit().getScreenResolution();
             }
@@ -396,7 +398,7 @@ public class ImageIOHelper {
             int dpiY;
             if (nodes.getLength() > 0) {
                 float dpcHeight = Float.parseFloat(nodes.item(0).getAttributes().item(0).getNodeValue());
-                dpiY = (int) Math.round(25.4f / dpcHeight);
+                dpiY = Math.round(25.4f / dpcHeight);
             } else {
                 dpiY = Toolkit.getDefaultToolkit().getScreenResolution();
             }

@@ -108,7 +108,7 @@ public class PageItemTests {
     }
     
     @Test
-    public void testCreateBlock() throws PageModelException {
+    public void testCreateBlock() {
         BlockOrientation o = new BlockOrientation(orientation, direction, order, angle);
         Block block = new Block(blockType, o, box);
         JsonItem jsonBlock = new JsonItem(block);
@@ -128,7 +128,7 @@ public class PageItemTests {
     }
 
     @Test
-    public void testSerializeBlock() throws PageModelException, IOException {
+    public void testSerializeBlock() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         
         BlockOrientation o = new BlockOrientation(orientation, direction, order, angle);

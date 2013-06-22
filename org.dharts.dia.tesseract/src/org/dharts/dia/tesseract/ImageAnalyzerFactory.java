@@ -157,7 +157,7 @@ public class ImageAnalyzerFactory {
     //========================================================================================
     
     private ImageAnalyzerFactory(String datapath, String language, OcrEngineMode oem) 
-            throws TesseractException {
+    {
         this.datapath = datapath;
         this.language = language;
         this.oem = oem;
@@ -179,7 +179,7 @@ public class ImageAnalyzerFactory {
         destroyed = true;
         try {
             handle.close();
-        } catch (InvalidStateException hce) {
+        } catch (Exception hce) {
             LOGGER.error("Attempt to close a handle that is not in a closable state.", hce);
         }
     }
@@ -269,9 +269,10 @@ public class ImageAnalyzerFactory {
      * adopt a fail fast policy in which attempts to create an analyzer without closing the 
      * previous one will throw an exception.
      *   
-     * @param analyzer The analyzer to release.
+     * @param a The analyzer to release.
      */
-    void release(ImageAnalyzerImpl analyzer) {
+    void release(ImageAnalyzerImpl a) {
+    	// HACK: do we need to check that this is the right one?
         this.analyzer = null;
     }
     
@@ -317,9 +318,11 @@ public class ImageAnalyzerFactory {
         checkAnalyzer();
         
         // HACK: perform pre and post configuration. Need to find a better way to achieve this
+        // NOTE: this is not thread safe.
         pcd.configure(this);
-        ImageAnalyzer analyzer = createImageAnalyzer(image);
+        createImageAnalyzer(image);
         pcd.configure(this, analyzer);
+        
         return analyzer;
     }
     
@@ -386,11 +389,11 @@ public class ImageAnalyzerFactory {
      */
     public class ImageAnalyzerImpl implements ImageAnalyzer {
 
-        private final Map<String, String> properties;
+        private final Map<String, String> analyzerProperties;
         private final BufferedImage image;
         
         // The iterator currently in use (if any)
-        private LayoutIterator iterator = null;
+        private LayoutIterator layoutIterator = null;
         private boolean closed = false;
         
         //========================================================================================
@@ -405,20 +408,19 @@ public class ImageAnalyzerFactory {
          */
         private ImageAnalyzerImpl(BufferedImage image) {
             this.image = image;
-            this.properties = Collections.unmodifiableMap(
+            this.analyzerProperties = Collections.unmodifiableMap(
                     new HashMap<String, String>(ImageAnalyzerFactory.this.properties));
             
         }
         
         private void init() throws InvalidParameterException, TesseractException {
             // update the page segmentation mode
-            TesseractHandle handle = ImageAnalyzerFactory.this.handle;
             handle.setPageSegMode(psm);
             
             try {
                 // update any configurations variables
-                for (String name : properties.keySet()) {
-                    handle.setVariable(name, properties.get(name));
+                for (String name : analyzerProperties.keySet()) {
+                    handle.setVariable(name, analyzerProperties.get(name));
                 }
         
                 handle.setImage(image);
@@ -438,7 +440,7 @@ public class ImageAnalyzerFactory {
         }
         
         private void checkIterator() throws TesseractException {
-            if (iterator != null) {
+            if (layoutIterator != null) {
                 throw new TesseractException("Concurrent Access Exception: There is an " +
                         "outstanding <code>PageIterator</code> for this analyzer. Please " +
                         "ensure that you close the iterators before ");
@@ -462,13 +464,13 @@ public class ImageAnalyzerFactory {
          */
         private <X extends LayoutIterator> X wrapIterator(final X iterator) {
             // TODO support cloning
-            this.iterator = iterator;
+            this.layoutIterator = iterator;
             iterator.onClose(new CloseListener<LayoutIterator>() {
                 
                 @Override
-                public void closed(LayoutIterator handle) {
-                    if (ImageAnalyzerImpl.this.iterator == handle)
-                        ImageAnalyzerImpl.this.iterator = null;
+                public void closed(LayoutIterator iteratorToClose) {
+                    if (layoutIterator == iteratorToClose)
+                        layoutIterator = null;
                 }
             });
             
