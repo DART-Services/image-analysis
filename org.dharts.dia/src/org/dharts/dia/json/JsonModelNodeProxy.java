@@ -24,12 +24,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.dharts.dia.BasicModelNode;
-import org.dharts.dia.Level;
-import org.dharts.dia.LevelProvider;
-import org.dharts.dia.PageItem;
-import org.dharts.dia.PageModelException;
-import org.dharts.dia.PageModelNode;
+import org.dharts.dia.model.BasicModelNode;
+import org.dharts.dia.model.Level;
+import org.dharts.dia.model.LevelProvider;
+import org.dharts.dia.model.PageItem;
+import org.dharts.dia.model.PageModelException;
+import org.dharts.dia.model.PageModelNode;
 
 /**
  * @author Neal Audenaert

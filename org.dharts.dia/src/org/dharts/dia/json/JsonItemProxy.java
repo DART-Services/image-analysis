@@ -22,8 +22,8 @@ import java.util.Map;
 
 import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.dharts.dia.BoundingBox;
-import org.dharts.dia.PageItem;
-import org.dharts.dia.PageModel;
+import org.dharts.dia.model.PageItem;
+import org.dharts.dia.model.PageModel;
 
 /**
  * @author Neal Audenaert

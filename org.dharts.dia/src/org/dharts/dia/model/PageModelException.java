@@ -1,4 +1,4 @@
-/* File: BlockIterator.java
+/* File: PageModelException.java
  * Created: Feb 9, 2013
  * Author: Neal Audenaert
  *
@@ -16,16 +16,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.dharts.dia;
-
-import java.util.Iterator;
-
-
+package org.dharts.dia.model;
 
 /**
- * @author Neal Audenaert
+ * Indicates an error in constructing or accessing a page model, such as an attempt to add 
+ * a {@link PageModelNode} at an in appropriate place in the model or an attempt to access
+ * a non-existant {@link PageModelNode}.
+ * 
+ * @author Neal Audenert
  */
-public interface PageItemIterator<I extends PageItem> extends Iterator<I> {
+public class PageModelException extends Exception {
 
-	// Constrains the type of element being iterated over. Does not add API. 
+    public PageModelException() {
+    }
+
+    public PageModelException(String message) {
+        super(message);
+    }
+
+    public PageModelException(Throwable cause) {
+        super(cause);
+    }
+    
+    public PageModelException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

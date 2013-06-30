@@ -16,12 +16,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.dharts.dia;
+package org.dharts.dia.model;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import org.dharts.dia.BoundingBox;
+import org.dharts.dia.BoxUtils;
 
 
 /**
