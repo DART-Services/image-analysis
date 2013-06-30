@@ -23,9 +23,9 @@ import java.util.Collection;
 import java.util.Collections;
 
 import org.dharts.dia.BoundingBox;
-import org.dharts.dia.Level;
-import org.dharts.dia.PageItem;
 import org.dharts.dia.SimpleBoxComparator;
+import org.dharts.dia.model.Level;
+import org.dharts.dia.model.PageItem;
 import org.dharts.dia.props.PropertyException;
 import org.dharts.dia.props.SimpleTypedKey;
 import org.dharts.dia.props.SimpleTypedMap;

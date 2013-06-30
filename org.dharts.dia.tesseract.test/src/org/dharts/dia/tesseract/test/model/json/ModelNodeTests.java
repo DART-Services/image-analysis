@@ -22,14 +22,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.dharts.dia.BasicModelNode;
 import org.dharts.dia.BoundingBox;
 import org.dharts.dia.BoxUtils;
-import org.dharts.dia.Level;
-import org.dharts.dia.LevelProvider;
-import org.dharts.dia.PageModelException;
-import org.dharts.dia.PageModelNode;
 import org.dharts.dia.SimpleBoundingBox;
+import org.dharts.dia.model.BasicModelNode;
+import org.dharts.dia.model.Level;
+import org.dharts.dia.model.LevelProvider;
+import org.dharts.dia.model.PageModelException;
+import org.dharts.dia.model.PageModelNode;
 import org.dharts.dia.tesseract.model.TessPageItem;
 import org.dharts.dia.tesseract.model.TesseractLevelCatalog;
 

@@ -27,10 +27,10 @@ import java.util.Map;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.dharts.dia.BoundingBox;
-import org.dharts.dia.Level;
-import org.dharts.dia.LevelProvider;
-import org.dharts.dia.PageModelException;
 import org.dharts.dia.SimpleBoundingBox;
+import org.dharts.dia.model.Level;
+import org.dharts.dia.model.LevelProvider;
+import org.dharts.dia.model.PageModelException;
 import org.dharts.dia.props.TypedKey;
 import org.dharts.dia.tesseract.BlockOrientation;
 import org.dharts.dia.tesseract.PublicTypes;

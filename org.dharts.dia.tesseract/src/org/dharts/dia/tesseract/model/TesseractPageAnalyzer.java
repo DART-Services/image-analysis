@@ -23,11 +23,11 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.dharts.dia.BoundingBox;
-import org.dharts.dia.PageItem;
-import org.dharts.dia.PageItemIterator;
-import org.dharts.dia.PageModel;
-import org.dharts.dia.PageModelException;
 import org.dharts.dia.SimpleBoundingBox;
+import org.dharts.dia.model.PageItem;
+import org.dharts.dia.model.PageItemIterator;
+import org.dharts.dia.model.PageModel;
+import org.dharts.dia.model.PageModelException;
 import org.dharts.dia.tesseract.BlockOrientation;
 import org.dharts.dia.tesseract.ImageAnalyzer;
 import org.dharts.dia.tesseract.ImageAnalyzerFactory;

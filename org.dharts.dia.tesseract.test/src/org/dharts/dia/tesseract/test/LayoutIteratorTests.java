@@ -25,7 +25,7 @@ import static org.junit.Assert.assertNotNull;
 import java.awt.Rectangle;
 import java.io.IOException;
 
-import org.dharts.dia.PageModelException;
+import org.dharts.dia.model.PageModelException;
 import org.dharts.dia.tesseract.ImageAnalyzer;
 import org.dharts.dia.tesseract.LayoutIterator;
 import org.dharts.dia.tesseract.TesseractException;

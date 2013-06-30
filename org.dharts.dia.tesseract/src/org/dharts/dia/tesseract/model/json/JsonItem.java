@@ -23,10 +23,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.dharts.dia.BoundingBox;
-import org.dharts.dia.LevelProvider;
-import org.dharts.dia.PageItem;
-import org.dharts.dia.PageModelException;
 import org.dharts.dia.json.JsonItemProxy;
+import org.dharts.dia.model.LevelProvider;
+import org.dharts.dia.model.PageItem;
+import org.dharts.dia.model.PageModelException;
 import org.dharts.dia.props.PropertyException;
 import org.dharts.dia.props.SimpleTypedMap;
 import org.dharts.dia.props.TypedKey;

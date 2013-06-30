@@ -9,6 +9,7 @@ Import-Package: org.apache.log4j,
  org.dharts.config.params,
  org.dharts.dia,
  org.dharts.dia.json,
+ org.dharts.dia.model,
  org.dharts.dia.props
 Export-Package: org.dharts.dia.tesseract,
  org.dharts.dia.tesseract.model,

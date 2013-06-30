@@ -35,9 +35,9 @@ import java.util.TreeSet;
 
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig.Feature;
-import org.dharts.dia.Level;
-import org.dharts.dia.LevelProvider;
-import org.dharts.dia.PageModelException;
+import org.dharts.dia.model.Level;
+import org.dharts.dia.model.LevelProvider;
+import org.dharts.dia.model.PageModelException;
 import org.dharts.dia.tesseract.tess4j.TessAPI;
 
 /**

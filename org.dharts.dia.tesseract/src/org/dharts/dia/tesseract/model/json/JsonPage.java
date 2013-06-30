@@ -21,7 +21,7 @@ package org.dharts.dia.tesseract.model.json;
 import java.util.List;
 
 import org.dharts.dia.BoundingBox;
-import org.dharts.dia.PageModelNode;
+import org.dharts.dia.model.PageModelNode;
 import org.dharts.dia.tesseract.model.Page;
 
 /**

@@ -20,7 +20,7 @@ package org.dharts.dia.tesseract;
 
 import java.nio.IntBuffer;
 
-import org.dharts.dia.FontAttributes;
+import org.dharts.dia.model.FontAttributes;
 import org.dharts.dia.tesseract.model.TesseractLevel;
 import org.dharts.dia.tesseract.tess4j.ResultHandle;
 

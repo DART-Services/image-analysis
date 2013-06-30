@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.dharts.dia.BoundingBox;
-import org.dharts.dia.PageItem;
+import org.dharts.dia.model.PageItem;
 import org.dharts.dia.props.PropertyException;
 import org.dharts.dia.props.SimpleTypedKey;
 import org.dharts.dia.props.SimpleTypedMap;

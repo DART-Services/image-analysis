@@ -22,8 +22,8 @@ import java.util.NoSuchElementException;
 
 import org.apache.log4j.Logger;
 import org.dharts.dia.BoundingBox;
-import org.dharts.dia.PageItem;
-import org.dharts.dia.PageItemIterator;
+import org.dharts.dia.model.PageItem;
+import org.dharts.dia.model.PageItemIterator;
 import org.dharts.dia.tesseract.LayoutIterator;
 
 /**

@@ -24,7 +24,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.dharts.dia.Level;
+import org.dharts.dia.model.Level;
 
 /**
  * @author Neal Audenaert
