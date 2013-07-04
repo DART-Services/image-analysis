@@ -8,4 +8,5 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: org.dharts.dia,
  org.dharts.dia.json,
  org.dharts.dia.model,
- org.dharts.dia.props
+ org.dharts.dia.props,
+ org.dharts.dia.threshold
