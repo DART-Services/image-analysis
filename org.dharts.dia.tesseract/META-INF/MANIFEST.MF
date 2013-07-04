@@ -14,3 +14,4 @@ Import-Package: org.apache.log4j,
 Export-Package: org.dharts.dia.tesseract,
  org.dharts.dia.tesseract.model,
  org.dharts.dia.tesseract.tess4j
+Require-Bundle: org.dharts.dia.lib;bundle-version="1.0.0"
