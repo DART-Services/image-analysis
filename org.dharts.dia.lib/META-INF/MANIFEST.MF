@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: DIA Libraries
+Bundle-SymbolicName: org.dharts.dia.lib
+Bundle-Version: 1.0.0.qualifier
+Bundle-Vendor: Digital Archives, Research & Technology Services
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
