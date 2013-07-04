@@ -16,4 +16,5 @@ Export-Package: com.sun.jna,
  com.sun.jna.ptr,
  com.sun.media.imageio.plugins.tiff,
  org.apache.log4j,
+ org.codehaus.jackson.annotate,
  org.codehaus.jackson.map

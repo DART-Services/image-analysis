@@ -10,3 +10,4 @@ Export-Package: org.dharts.dia,
  org.dharts.dia.model,
  org.dharts.dia.props,
  org.dharts.dia.threshold
+Require-Bundle: org.dharts.dia.lib;bundle-version="1.0.0"
