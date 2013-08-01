@@ -180,7 +180,7 @@ public interface Thresholder extends Callable<BufferedImage> {
      * @return <code>true</code> if the <code>Thresholder</code> has finished 
      *      processing the image, false if it has not.
      */
-    public boolean isDone();
+//    public boolean isDone();
 
     
 }

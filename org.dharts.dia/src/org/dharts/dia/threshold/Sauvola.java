@@ -280,7 +280,7 @@ public class Sauvola implements Thresholder {
     
     @Override
     public BufferedImage getResult() {
-        if (this.isDone())
+        if (m_processed)
         	return m_output;
         else
         	throw new IllegalStateException("Execution has not completed");
@@ -289,10 +289,5 @@ public class Sauvola implements Thresholder {
     @Override
     public boolean isReady() {
         return m_initialized;
-    }
-
-    @Override
-    public boolean isDone() {
-        return m_processed;
     }
 }
