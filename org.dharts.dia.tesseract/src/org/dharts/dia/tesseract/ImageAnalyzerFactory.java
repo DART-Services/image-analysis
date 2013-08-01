@@ -44,7 +44,7 @@ import org.dharts.dia.tesseract.tess4j.TesseractHandle.InvalidStateException;
  * 
  * @author Neal Audenaert
  */
-public class ImageAnalyzerFactory {
+public class ImageAnalyzerFactory implements AutoCloseable {
     private static final Logger LOGGER = Logger.getLogger(ImageAnalyzerFactory.class);
     
     /**
@@ -175,6 +175,7 @@ public class ImageAnalyzerFactory {
      * Closes this ImageAnalyzerFactory. Factories must be shut down after use to reclaim 
      * memory and free up resources for other factories.
      */
+    @Override
     public void close() {
         destroyed = true;
         try {
