@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.imageio.ImageIO;
 
@@ -33,35 +34,34 @@ import javax.imageio.ImageIO;
  * 
  * @author Neal Audenaert
  */
-public class FastSauvola implements Thresholder {
+public class FastSauvola implements Thresholder 
+{
+	// TODO need to factor out the integral image concepts and tools from the thresholder 
+	private static final int N_THREADS = 10;		// default number of threads to use internally
     
-    private static final int N_THREADS = 10;
-	// -----------------------------------------------------------------------
+    private final ExecutorService ex;
+    private int width  = 0;
+    private int height = 0;
+    private int imArea = 0;
+    private final AtomicInteger ct = new AtomicInteger(0);
+    
+    private boolean enableOutput = true;
+    private BufferedImage sourceImage = null;
+    private BufferedImage outputImage = null;
+    
+    // TODO should evaluate using single dimensional arrays
+    private long[][] iImg;			// integral image
+    private long[][] iImgSq;		// integral image squared
+    
+    // -----------------------------------------------------------------------
     // PROPERTIES
     // -----------------------------------------------------------------------
-    private boolean initialized = false;
-    private boolean processed   = false;
-    
-    private int m_width  = 0;
-    private int m_height = 0;
-    
     // TODO make these configuration parameters.
     private int    ts = 48;     // tile size
     private int    whalf = ts / 2;	// half the window size
     private double k  = 0.3;    //
     private int    r  = 128;    // control for dynamic range
 
-    private BufferedImage sourceImage  = null;
-    private BufferedImage outputImage = null;
-    
-    private long[][] m_iImg;
-    private long[][] m_iImgSq;
-	private final ExecutorService ex;
-	private File sourceFile;
-    
-    // -----------------------------------------------------------------------
-    // CONSTRUCTOR
-    // -----------------------------------------------------------------------
     /** Default constructor. */
     public FastSauvola() {  
     	ex = Executors.newFixedThreadPool(N_THREADS);
@@ -71,162 +71,129 @@ public class FastSauvola implements Thresholder {
     	ex = Executors.newFixedThreadPool(nThreads);
     }
 
-    // -----------------------------------------------------------------------
-    // INITIALIZATION METHODS
-    // -----------------------------------------------------------------------
     @Override
 	public void initialize(File file) throws IOException {
 		if (!file.exists() || !file.isFile() || !file.canRead()) {
             throw new IOException("Filename does not refer to a readable image file");
         }
         
-		this.sourceFile = file;
+		initialize(ImageIO.read(file));
     }
 
     @Override
     public void initialize(BufferedImage image) {
-        m_width  = image.getWidth();
-        m_height = image.getHeight();
+        width  = image.getWidth();
+        height = image.getHeight();
+        imArea = width * height;
         
         sourceImage = ImageUtils.grayscale(image); 
 
         // Makes for a reasonable assumption, but this parameter really needs
         // to be configured for good results
-        ts = m_width / 15;
-
-        // initialize the output image
-        initialized = true;
-        processed   = false;
+        ts = width / 15;
     }
     
-    // -----------------------------------------------------------------------
-    // SAUVOLA ALGORITHM IMPLEMENTATION
-    // -----------------------------------------------------------------------
+    public void setGenerateImage(boolean flag)
+    {
+    	this.enableOutput = flag;
+    }
     
     @Override
 	public BufferedImage call() throws InterruptedException, IOException
     {
-    	long start = System.currentTimeMillis();
-    	if (sourceImage == null && sourceFile != null)
-    		initialize(ImageIO.read(sourceFile));
-    	
-        if (!this.isReady()) 
+    	if (!this.isReady()) 
             throw new IllegalStateException("The thresholding algorithm has not been properly initialized");
         
         Raster original = sourceImage.getData();
-        
         computeIntegral(original);
-        BufferedImage result = performThresholding(original);
-        long end = System.currentTimeMillis();
+        outputImage = performThresholding(original);
         
-        System.out.println("Processing Time: " + (end - start));
-        return result;
+        return outputImage;
     }
 
-	// -----------------------------------------------------------------------
-	// SAUVOLA ALGORITHM IMPLEMENTATION
-	// -----------------------------------------------------------------------
-	
 	private final void computeIntegral(Raster data) {
 	    // compute the integral of the image
-	    int[][] rowsumImage      = new int[m_width][m_height];
-	    int[][] rowsumSqImage    = new int[m_width][m_height];
-	    long[][] integralImage   = new long[m_width][m_height];
-	    long[][] integralSqImage = new long[m_width][m_height];
+	    int[][] rowsumImage = new int[width][height];
+	    int[][] rowsumSqImage = new int[width][height];
+	    long[][] integralImage = new long[width][height];
+	    long[][] integralSqImage = new long[width][height];
 	
-	    for (int j = 0; j < m_height; j++) {
-	        int s = data.getSample(0, j, 0); // m_image.get.getSample(0, j, 0);
-	        rowsumImage[0][j]   = s;
-	        rowsumSqImage[0][j] = s * s;
+	    for (int y = 0; y < height; y++) {
+	        int s = data.getSample(0, y, 0);
+	        rowsumImage[0][y] = s;
+	        rowsumSqImage[0][y] = s * s;
 	    }
 	
-	    for (int i = 1; i < m_width; i++) {
-	        for(int j = 0; j < m_height; j++) {
-	            int s = data.getSample(i, j, 0);
+	    for (int x = 1; x < width; x++) {
+	        for (int y = 0; y < height; y++) {
+	            int s = data.getSample(x, y, 0);
 	
-	            rowsumImage[i][j]   = rowsumImage[i - 1][j] + s;
-	            rowsumSqImage[i][j] = rowsumSqImage[i - 1][j] + s * s;
+	            rowsumImage[x][y] = rowsumImage[x - 1][y] + s;
+	            rowsumSqImage[x][y] = rowsumSqImage[x - 1][y] + s * s;
 	        }
 	    }
 	
-	    for (int i = 0; i < m_width; i++) {
-	        integralImage[i][0]   = rowsumImage[i][0];
-	        integralSqImage[i][0] = rowsumSqImage[i][0];
-	    }
+	    for (int x = 0; x < width; x++) {
+	    	integralImage[x][0] = rowsumImage[x][0];
+	    	integralSqImage[x][0] = rowsumSqImage[x][0];
+	    	
+	        for (int y = 1; y < height; y++) {
+	            integralImage[x][y] = integralImage[x][y - 1] + rowsumImage[x][y];
+	            integralSqImage[x][y] = integralSqImage[x][y - 1] + rowsumSqImage[x][y];
 	
-	    for (int i = 0; i < m_width; i++) {
-	        for (int j = 1; j < m_height; j++) {
-	            integralImage[i][j] = integralImage[i][j - 1] + rowsumImage[i][j];
-	            integralSqImage[i][j] = integralSqImage[i][j - 1] + rowsumSqImage[i][j];
-	
-	            assert rowsumImage[i][j] >= 0;
-	            assert rowsumSqImage[i][j] >= 0;
-	            assert integralImage[i][j] >= 0;
-	            assert integralSqImage[i][j] >= 0;
+	            assert rowsumImage[x][y] >= 0;
+	            assert rowsumSqImage[x][y] >= 0;
+	            assert integralImage[x][y] >= 0;
+	            assert integralSqImage[x][y] >= 0;
 	        }
 	    }
 	
-	    m_iImg   = integralImage;
-	    m_iImgSq = integralSqImage;
+	    iImg   = integralImage;
+	    iImgSq = integralSqImage;
 	}
 
-	private BufferedImage performThresholding(Raster original)
-			throws InterruptedException {
-		WritableRaster output = sourceImage.getData().createCompatibleWritableRaster();
-        // threshold the image
-        for (int i = 0; i < m_width; i++) {
-    		ex.execute(new ColumnProcessor(output, original, i));
+	private BufferedImage performThresholding(Raster original) throws InterruptedException {
+		WritableRaster output = null;
+		if (enableOutput)
+			output = sourceImage.getData().createCompatibleWritableRaster();
+		
+        for (int col = 0; col < width; col++) {
+    		ex.execute(new ColumnProcessor(col, original, output));
         }
         
         ex.shutdown();
-        try {
-			ex.awaitTermination(5, TimeUnit.SECONDS);
-			outputImage = new BufferedImage(sourceImage.getColorModel(), output, true, new Hashtable<>());
-			return outputImage;
-		} catch (InterruptedException e) {
-			throw e;
-			
-		} finally {
-			processed = true;
-		}
+        ex.awaitTermination(5, TimeUnit.SECONDS);		// HACK: arbitrary delay
+        if (enableOutput)
+        	return new BufferedImage(sourceImage.getColorModel(), output, true, new Hashtable<>());
+        else 
+        	return null;
 	}
 
-	public final RegionDistribution computeDistribution(int xmin, int ymin, int xmax, int ymax) {
-		double diagsum, idiagsum, diff, sqdiagsum, sqidiagsum, sqdiff, area;
-       
-		area = (xmax - xmin + 1) * (ymax - ymin + 1);
+	public double getMean() 
+	{
+		int xmax = width - 1;
+		int ymax = height - 1;
+		double area = width * height;
 		
-		assert area > 0 : "Area should be positive.";
-		
-		if ((xmin == 0) && (ymin == 0)) {               // Point at origin
-		    diff   = m_iImg[xmax][ymax];
-		    sqdiff = m_iImgSq[xmax][ymax];
-		    
-		} else if ((xmin == 0) && (ymin != 0)) {        // first column
-		    diff   = m_iImg[xmax][ymax] - m_iImg[xmax][ymin - 1];
-		    sqdiff = m_iImgSq[xmax][ymax] - m_iImgSq[xmax][ymin - 1];
-		    
-		} else if ((xmin != 0) && (ymin == 0)) {        // first row
-		    diff   = m_iImg[xmax][ymax] - m_iImg[xmin - 1][ymax];
-		    sqdiff = m_iImgSq[xmax][ymax] - m_iImgSq[xmin - 1][ymax];
-		    
-		} else {                                        // rest of the image
-		    diagsum    = m_iImg[xmax][ymax] + m_iImg[xmin - 1][ymin - 1];
-		    idiagsum   = m_iImg[xmax][ymin - 1] + m_iImg[xmin - 1][ymax];
-		    diff       = diagsum - idiagsum;
-		    
-		    sqdiagsum  = m_iImgSq[xmax][ymax] + m_iImgSq[xmin - 1][ymin - 1];
-		    sqidiagsum = m_iImgSq[xmax][ymin - 1] + m_iImgSq[xmin - 1][ymax];
-		    sqdiff     = sqdiagsum - sqidiagsum;
-		}
-
-		RegionDistribution result = new RegionDistribution();
-		result.mean = diff / area;
-		result.stddev = Math.sqrt((sqdiff - (diff * diff) / area) / (area - 1));
-		
-		return result;
+		return iImg[xmax][ymax] / area;
 	}
-    
+	
+	public final double getStandardDeviation() 
+	{
+		return Math.sqrt(getVariance());
+	}
+	
+	public final double getVariance() 
+	{
+		int xmax = width - 1;
+		int ymax = height - 1;
+		
+		double diff   = iImg[xmax][ymax];
+		double sqdiff = iImgSq[xmax][ymax];
+		
+		return (sqdiff - (diff * diff) / imArea) / (imArea - 1);
+	}
+	
 	// -----------------------------------------------------------------------
     // ACCESSOR METHODS
     // -----------------------------------------------------------------------
@@ -291,7 +258,7 @@ public class FastSauvola implements Thresholder {
     
     @Override
 	public BufferedImage getResult() {
-        if (this.isDone()) 
+        if (outputImage != null) 
         	return outputImage;
         else
         	throw new IllegalStateException("Execution is not complete");
@@ -299,24 +266,75 @@ public class FastSauvola implements Thresholder {
     
     public int getWidth() 
 	{
-		return m_width;
+		return width;
 	}
 
 
 	public int getHeight() 
 	{
-		return m_height;
+		return height;
 	}
+	
+	public int getArea()
+	{
+		return imArea;
+	}
+	
+	public long[] getVerticalProjection()
+	{
+		long[] result = new long[width];
+		
+		int w = 10;				// size of soothing window;
+		int mid = w / 10; 		// midpoint of smoothing window
+		int y = height = 1;
 
+		int x2 = width - w - 1;
+		// NOTE, I'm really interested in the derivative, not in the raw projection
+		for (int x = 0; x < mid; x++)
+		{
+			result[x] = (iImg[w][y] - iImg[0][y]) / w;  // NOTE: this truncates rather than rounds
+			result[x2] = (iImg[x2][y] - iImg[width - 1][y]) / w;  
+		}
+		
+		result[0] = iImg[0][y];
+		for (int i = 0; i < width - w; i++)
+		{
+			int x = i + mid;
+			result[x] = (iImg[i + w][y] - iImg[i][y]) / w;
+		}
+		
+		return result;
+	}
+	
+	public long[] getHorizontalProjection()
+	{
+		// TODO need to apply a smoothing function
+		long[] result = new long[height];
+		int x = width = 1;
+		long[] temp = iImg[x];
+		result[0] = iImg[x][0];
+		for (int y = 1; x < width; x++)
+		{
+			result[y] = temp[y] - temp[y - 1];
+		}
+		
+		return result;
+	}
+	
+	public int getForegroundPixelCount() 
+	{
+		return ct.get();
+	}
+	
+	public int getBackgroundPixelCount() 
+	{
+		return imArea - ct.get();
+	}
+	
 
 	@Override
 	public boolean isReady() {
-        return initialized;
-    }
-
-    @Override
-	public boolean isDone() {
-        return processed;
+        return sourceImage != null;
     }
 
 	private final class ColumnProcessor implements Runnable {
@@ -324,7 +342,7 @@ public class FastSauvola implements Thresholder {
 		private final Raster original;
 		private int i;
 
-		private ColumnProcessor(WritableRaster output, Raster original, int colIx) {
+		private ColumnProcessor(int colIx, Raster original, WritableRaster output) {
 			this.i = colIx;
 			this.output = output;
 			this.original = original;
@@ -332,40 +350,54 @@ public class FastSauvola implements Thresholder {
 
 		@Override
 		public void run() {
+			double diagsum, idiagsum, diff, sqdiagsum, sqidiagsum, sqdiff, area;
+			double mean, stddev;
 			int xmin, ymin, xmax, ymax;
 			
 			double threshold;
+			boolean isBackground;
 			
-			for (int j = 0; j < m_height; j++) {
+			for (int j = 0; j < height; j++) {
 				xmin = Math.max(0, i - whalf);
 				ymin = Math.max(0, j - whalf);
-				xmax = Math.min(m_width - 1, i + whalf);
-				ymax = Math.min(m_height - 1, j + whalf);
+				xmax = Math.min(width - 1, i + whalf);
+				ymax = Math.min(height - 1, j + whalf);
+			       
+				area = (xmax - xmin + 1) * (ymax - ymin + 1);
 				
-				RegionDistribution dist = computeDistribution(xmin, ymin, xmax, ymax);
-				
-				threshold = dist.mean * (1 + k * ((dist.stddev / r) - 1));
-				
-				if (original.getSample(i, j, 0) > threshold) 
-					output.setSample(i, j, 0, 255);
-				else 
-					output.setSample(i, j, 0, 0);
-			}
-			
-		}
-	}
+				if ((xmin == 0) && (ymin == 0)) {               // Point at origin
+				    diff   = iImg[xmax][ymax];
+				    sqdiff = iImgSq[xmax][ymax];
+				    
+				} else if ((xmin == 0) && (ymin != 0)) {        // first column
+				    diff   = iImg[xmax][ymax] - iImg[xmax][ymin - 1];
+				    sqdiff = iImgSq[xmax][ymax] - iImgSq[xmax][ymin - 1];
+				    
+				} else if ((xmin != 0) && (ymin == 0)) {        // first row
+				    diff   = iImg[xmax][ymax] - iImg[xmin - 1][ymax];
+				    sqdiff = iImgSq[xmax][ymax] - iImgSq[xmin - 1][ymax];
+				    
+				} else {                                        // rest of the image
+				    diagsum    = iImg[xmax][ymax] + iImg[xmin - 1][ymin - 1];
+				    idiagsum   = iImg[xmax][ymin - 1] + iImg[xmin - 1][ymax];
+				    diff       = diagsum - idiagsum;
+				    
+				    sqdiagsum  = iImgSq[xmax][ymax] + iImgSq[xmin - 1][ymin - 1];
+				    sqidiagsum = iImgSq[xmax][ymin - 1] + iImgSq[xmin - 1][ymax];
+				    sqdiff     = sqdiagsum - sqidiagsum;
+				}
 
-	public static final class RegionDistribution
-	{
-		private double mean;
-		private double stddev;
-		
-		public double getMean() {
-			return mean;
-		}
-		
-		public double getStddev() {
-			return stddev;
+				mean = diff / area;
+				stddev = Math.sqrt((sqdiff - (diff * diff) / area) / (area - 1));
+				
+				threshold = mean * (1 + k * ((stddev / r) - 1));
+				isBackground = original.getSample(i, j, 0) > threshold;
+				if (output != null)
+					output.setSample(i, j, 0, isBackground ? 255 : 0);
+				
+				if (!isBackground)
+					ct.incrementAndGet();
+			}
 		}
 	}
 }
