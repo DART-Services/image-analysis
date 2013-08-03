@@ -39,6 +39,7 @@ public class FastSauvola implements Thresholder
 	// TODO need to factor out the integral image concepts and tools from the thresholder 
 	private static final int N_THREADS = 10;		// default number of threads to use internally
     
+	
     private final ExecutorService ex;
     private int width  = 0;
     private int height = 0;
@@ -49,9 +50,10 @@ public class FastSauvola implements Thresholder
     private BufferedImage sourceImage = null;
     private BufferedImage outputImage = null;
     
-    // TODO should evaluate using single dimensional arrays
-    private long[][] iImg;			// integral image
-    private long[][] iImgSq;		// integral image squared
+    private IntegralImage iImage;
+//    // TODO should evaluate using single dimensional arrays
+//    private long[][] iImg;			// integral image
+//    private long[][] iImgSq;		// integral image squared
     
     // -----------------------------------------------------------------------
     // PROPERTIES
@@ -82,16 +84,29 @@ public class FastSauvola implements Thresholder
 
     @Override
     public void initialize(BufferedImage image) {
-        width  = image.getWidth();
-        height = image.getHeight();
-        imArea = width * height;
-        
         sourceImage = ImageUtils.grayscale(image); 
-
-        // Makes for a reasonable assumption, but this parameter really needs
-        // to be configured for good results
-        ts = width / 15;
+        iImage = new IntegralImage();
+        iImage.initialize(image);
+        
+        initProps();
     }
+    
+    public void initialize(BufferedImage image, IntegralImage iIm) {
+    	sourceImage = ImageUtils.grayscale(image); 
+    	this.iImage = iIm;
+    	
+    	initProps();
+    }
+
+	private void initProps() {
+		width = iImage.getWidth();
+    	height = iImage.getHeight();
+    	imArea = iImage.getArea();
+    	
+    	// Makes for a reasonable assumption, but this parameter really needs
+    	// to be configured for good results
+    	ts = width / 15;
+	}
     
     public void setGenerateImage(boolean flag)
     {
@@ -105,52 +120,10 @@ public class FastSauvola implements Thresholder
             throw new IllegalStateException("The thresholding algorithm has not been properly initialized");
         
         Raster original = sourceImage.getData();
-        computeIntegral(original);
         outputImage = performThresholding(original);
         
         return outputImage;
     }
-
-	private final void computeIntegral(Raster data) {
-	    // compute the integral of the image
-	    int[][] rowsumImage = new int[width][height];
-	    int[][] rowsumSqImage = new int[width][height];
-	    long[][] integralImage = new long[width][height];
-	    long[][] integralSqImage = new long[width][height];
-	
-	    for (int y = 0; y < height; y++) {
-	        int s = data.getSample(0, y, 0);
-	        rowsumImage[0][y] = s;
-	        rowsumSqImage[0][y] = s * s;
-	    }
-	
-	    for (int x = 1; x < width; x++) {
-	        for (int y = 0; y < height; y++) {
-	            int s = data.getSample(x, y, 0);
-	
-	            rowsumImage[x][y] = rowsumImage[x - 1][y] + s;
-	            rowsumSqImage[x][y] = rowsumSqImage[x - 1][y] + s * s;
-	        }
-	    }
-	
-	    for (int x = 0; x < width; x++) {
-	    	integralImage[x][0] = rowsumImage[x][0];
-	    	integralSqImage[x][0] = rowsumSqImage[x][0];
-	    	
-	        for (int y = 1; y < height; y++) {
-	            integralImage[x][y] = integralImage[x][y - 1] + rowsumImage[x][y];
-	            integralSqImage[x][y] = integralSqImage[x][y - 1] + rowsumSqImage[x][y];
-	
-	            assert rowsumImage[x][y] >= 0;
-	            assert rowsumSqImage[x][y] >= 0;
-	            assert integralImage[x][y] >= 0;
-	            assert integralSqImage[x][y] >= 0;
-	        }
-	    }
-	
-	    iImg   = integralImage;
-	    iImgSq = integralSqImage;
-	}
 
 	private BufferedImage performThresholding(Raster original) throws InterruptedException {
 		WritableRaster output = null;
@@ -169,31 +142,6 @@ public class FastSauvola implements Thresholder
         	return null;
 	}
 
-	public double getMean() 
-	{
-		int xmax = width - 1;
-		int ymax = height - 1;
-		double area = width * height;
-		
-		return iImg[xmax][ymax] / area;
-	}
-	
-	public final double getStandardDeviation() 
-	{
-		return Math.sqrt(getVariance());
-	}
-	
-	public final double getVariance() 
-	{
-		int xmax = width - 1;
-		int ymax = height - 1;
-		
-		double diff   = iImg[xmax][ymax];
-		double sqdiff = iImgSq[xmax][ymax];
-		
-		return (sqdiff - (diff * diff) / imArea) / (imArea - 1);
-	}
-	
 	// -----------------------------------------------------------------------
     // ACCESSOR METHODS
     // -----------------------------------------------------------------------
@@ -280,47 +228,6 @@ public class FastSauvola implements Thresholder
 		return imArea;
 	}
 	
-	public long[] getVerticalProjection()
-	{
-		long[] result = new long[width];
-		
-		int w = 10;				// size of soothing window;
-		int mid = w / 10; 		// midpoint of smoothing window
-		int y = height = 1;
-
-		int x2 = width - w - 1;
-		// NOTE, I'm really interested in the derivative, not in the raw projection
-		for (int x = 0; x < mid; x++)
-		{
-			result[x] = (iImg[w][y] - iImg[0][y]) / w;  // NOTE: this truncates rather than rounds
-			result[x2] = (iImg[x2][y] - iImg[width - 1][y]) / w;  
-		}
-		
-		result[0] = iImg[0][y];
-		for (int i = 0; i < width - w; i++)
-		{
-			int x = i + mid;
-			result[x] = (iImg[i + w][y] - iImg[i][y]) / w;
-		}
-		
-		return result;
-	}
-	
-	public long[] getHorizontalProjection()
-	{
-		// TODO need to apply a smoothing function
-		long[] result = new long[height];
-		int x = width = 1;
-		long[] temp = iImg[x];
-		result[0] = iImg[x][0];
-		for (int y = 1; x < width; x++)
-		{
-			result[y] = temp[y] - temp[y - 1];
-		}
-		
-		return result;
-	}
-	
 	public int getForegroundPixelCount() 
 	{
 		return ct.get();
@@ -350,7 +257,6 @@ public class FastSauvola implements Thresholder
 
 		@Override
 		public void run() {
-			double diagsum, idiagsum, diff, sqdiagsum, sqidiagsum, sqdiff, area;
 			double mean, stddev;
 			int xmin, ymin, xmax, ymax;
 			
@@ -363,33 +269,10 @@ public class FastSauvola implements Thresholder
 				xmax = Math.min(width - 1, i + whalf);
 				ymax = Math.min(height - 1, j + whalf);
 			       
-				area = (xmax - xmin + 1) * (ymax - ymin + 1);
-				
-				if ((xmin == 0) && (ymin == 0)) {               // Point at origin
-				    diff   = iImg[xmax][ymax];
-				    sqdiff = iImgSq[xmax][ymax];
-				    
-				} else if ((xmin == 0) && (ymin != 0)) {        // first column
-				    diff   = iImg[xmax][ymax] - iImg[xmax][ymin - 1];
-				    sqdiff = iImgSq[xmax][ymax] - iImgSq[xmax][ymin - 1];
-				    
-				} else if ((xmin != 0) && (ymin == 0)) {        // first row
-				    diff   = iImg[xmax][ymax] - iImg[xmin - 1][ymax];
-				    sqdiff = iImgSq[xmax][ymax] - iImgSq[xmin - 1][ymax];
-				    
-				} else {                                        // rest of the image
-				    diagsum    = iImg[xmax][ymax] + iImg[xmin - 1][ymin - 1];
-				    idiagsum   = iImg[xmax][ymin - 1] + iImg[xmin - 1][ymax];
-				    diff       = diagsum - idiagsum;
-				    
-				    sqdiagsum  = iImgSq[xmax][ymax] + iImgSq[xmin - 1][ymin - 1];
-				    sqidiagsum = iImgSq[xmax][ymin - 1] + iImgSq[xmin - 1][ymax];
-				    sqdiff     = sqdiagsum - sqidiagsum;
-				}
+				double[] model = iImage.getGausModel(xmin, ymin, xmax, ymax);
+				mean = model[0];
+				stddev = Math.sqrt(model[1]);
 
-				mean = diff / area;
-				stddev = Math.sqrt((sqdiff - (diff * diff) / area) / (area - 1));
-				
 				threshold = mean * (1 + k * ((stddev / r) - 1));
 				isBackground = original.getSample(i, j, 0) > threshold;
 				if (output != null)
