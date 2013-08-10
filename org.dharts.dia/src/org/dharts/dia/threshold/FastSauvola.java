@@ -10,7 +10,9 @@
  */
 package org.dharts.dia.threshold;
 
+import java.awt.color.ColorSpace;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorConvertOp;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.io.File;
@@ -82,18 +84,19 @@ public class FastSauvola implements Thresholder
 		initialize(ImageIO.read(file));
     }
 
+    private static final ColorConvertOp op = new ColorConvertOp(ColorSpace.getInstance(ColorSpace.CS_GRAY), null);
     @Override
     public void initialize(BufferedImage image) {
-        sourceImage = ImageUtils.grayscale(image); 
+     	sourceImage = op.filter(image, null);
         iImage = new IntegralImage();
-        iImage.initialize(image);
+        iImage.initialize(sourceImage);
         
         initProps();
     }
     
-    public void initialize(BufferedImage image, IntegralImage iIm) {
-    	sourceImage = ImageUtils.grayscale(image); 
+    public void initialize(IntegralImage iIm) {
     	this.iImage = iIm;
+    	this.sourceImage = iIm.getSourceImage();
     	
     	initProps();
     }
