@@ -40,9 +40,9 @@ public class FastSauvola implements Thresholder
 {
 	// TODO need to factor out the integral image concepts and tools from the thresholder 
 	private static final int N_THREADS = 10;		// default number of threads to use internally
-    
 	
     private final ExecutorService ex;
+
     private int width  = 0;
     private int height = 0;
     private int imArea = 0;
@@ -53,18 +53,15 @@ public class FastSauvola implements Thresholder
     private BufferedImage outputImage = null;
     
     private IntegralImage iImage;
-//    // TODO should evaluate using single dimensional arrays
-//    private long[][] iImg;			// integral image
-//    private long[][] iImgSq;		// integral image squared
     
     // -----------------------------------------------------------------------
     // PROPERTIES
     // -----------------------------------------------------------------------
     // TODO make these configuration parameters.
-    private int    ts = 48;     // tile size
+    private int    ts = 48;     	// tile size
     private int    whalf = ts / 2;	// half the window size
-    private double k  = 0.3;    //
-    private int    r  = 128;    // control for dynamic range
+    private double k  = 0.3;    	//
+    private int    r  = 128;    	// control for dynamic range
 
     /** Default constructor. */
     public FastSauvola() {  
@@ -215,35 +212,35 @@ public class FastSauvola implements Thresholder
         	throw new IllegalStateException("Execution is not complete");
     }
     
-    public int getWidth() 
+    public final int getWidth() 
 	{
 		return width;
 	}
 
 
-	public int getHeight() 
+	public final int getHeight() 
 	{
 		return height;
 	}
 	
-	public int getArea()
+	public final int getArea()
 	{
 		return imArea;
 	}
 	
-	public int getForegroundPixelCount() 
+	public final int getForegroundPixelCount() 
 	{
 		return ct.get();
 	}
 	
-	public int getBackgroundPixelCount() 
+	public final int getBackgroundPixelCount() 
 	{
 		return imArea - ct.get();
 	}
 	
 
 	@Override
-	public boolean isReady() {
+	public final boolean isReady() {
         return sourceImage != null;
     }
 
