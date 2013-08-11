@@ -16,9 +16,8 @@ limitations under the License.
 
 package com.jhlabs.image;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.image.*;
+import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
 
 /**
  * A filter for warping images using the gridwarp algorithm.
@@ -115,10 +114,12 @@ public class WarpFilter extends WholeImageFilter {
 		return time;
 	}
 
-	protected void transformSpace(Rectangle r) {
-		r.width *= frames;
+	@Override
+	protected Rectangle transformSpace(Rectangle r) {
+		return new Rectangle(r.x, r.y, r.width * frames, r.height);
 	}
 
+	@Override
 	protected int[] filterPixels( int width, int height, int[] inPixels, Rectangle transformedSpace ) {
 		int[] outPixels = new int[width * height];
 		
@@ -157,6 +158,7 @@ public class WarpFilter extends WholeImageFilter {
 		}
 	}
 	
+	@Override
 	public String toString() {
 		return "Distort/Mesh Warp...";
 	}
