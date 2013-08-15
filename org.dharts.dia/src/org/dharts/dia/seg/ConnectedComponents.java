@@ -15,42 +15,43 @@ package org.dharts.dia.seg;
  */
 public class ConnectedComponents
 {
-    final int MAX_LABELS = 80000;
-    int nextLabel = 1;
+    final static int MAX_LABELS = 8000000;
+//    int nextLabel = 1;
+//    private final UnionFind uf = new UnionFind(MAX_LABELS);
 
     /**
      * label and re-arrange the labels to make the numbers of label continuous
      * @param zeroAsBg Leaving label 0 untouched
      */
-    public int[] compactLabeling(int[] image, int w, int h, boolean zeroAsBg)
-    {
-        //label first
-        int[] label = labeling(image, w, h, zeroAsBg);
-        int[] stat = new int[nextLabel + 1];
-        for (int i=0;i<image.length;i++) {
-            if (label[i]>nextLabel)
-                System.err.println("bigger label than next_label found!");
-            stat[label[i]]++;
-        }
-
-        stat[0]=0;              // label 0 will be mapped to 0
-                                // whether 0 is background or not
-        int j = 1;
-        for (int i=1; i<stat.length; i++) {
-            if (stat[i]!=0) stat[i]=j++;
-        }
-
-        System.out.println("From "+nextLabel+" to "+(j-1)+" regions");
-        nextLabel= j-1;
-        for (int i=0;i<image.length;i++) label[i]= stat[label[i]];
-        return label;
-    }
+//    public int[] compactLabeling(int[] image, int w, int h, boolean zeroAsBg)
+//    {
+//        //label first
+//        int[] label = labeling(image, w, h, zeroAsBg);
+//        int[] stat = new int[nextLabel + 1];
+//        for (int i=0;i<image.length;i++) {
+//            if (label[i]>nextLabel)
+//                System.err.println("bigger label than next_label found!");
+//            stat[label[i]]++;
+//        }
+//
+//        stat[0]=0;              // label 0 will be mapped to 0
+//                                // whether 0 is background or not
+//        int j = 1;
+//        for (int i=1; i<stat.length; i++) {
+//            if (stat[i]!=0) stat[i]=j++;
+//        }
+//
+//        System.out.println("From "+nextLabel+" to "+(j-1)+" regions");
+//        nextLabel= j-1;
+//        for (int i=0;i<image.length;i++) label[i]= stat[label[i]];
+//        return label;
+//    }
 
     /**
      * return the max label in the labeling process.
      * the range of labels is [0..max_label]
      */
-    public int getMaxLabel() {return nextLabel;}
+//    public int getMaxLabel() {return nextLabel;}
 
 
     /**
@@ -65,114 +66,172 @@ public class ConnectedComponents
      */
     public int[] labeling(int[] image, int w, int h, boolean zeroAsBg)
     {
-//        int w = d.width, h = d.height;
-        int[] result = new int[w * h];
-        int[] parent = new int[MAX_LABELS];
-        int[] labels = new int[MAX_LABELS];
-
-        // region label starts from 1;
-        // this is required as union-find data structure
-        int next_region = 1;
-        for (int y = 0; y < h; ++y)
-        {
-            for (int x = 0; x < w; ++x)
-            {
-                if (image[y * w + x] == 0 && zeroAsBg)
-                	continue;		// don't label background pixels
-
-                int k = 0;
-                boolean connected = false;
-                // if connected to the left
-                if (x > 0 && image[y * w + x - 1] == image[y * w + x]) {
-                   k = result[y * w + x - 1];
-                   connected = true;
-                }
-
-                // if connected to the up
-                // TODO maybe handle first row separately
-                if (y > 0 && image[(y - 1) * w + x] == image[y * w + x] &&
-                    (connected = false || image[(y - 1) * w + x] < k )) {		// HACK: if this works, it needs documentatoin
-                    k = result[(y - 1) * w + x];
-                    connected = true;
-                }
-
-                if (!connected)
-                {
-                    k = next_region;
-                    next_region++;
-                }
-
-                if (k >= MAX_LABELS)
-                {
-                    System.err.println("maximum number of labels reached. increase MAX_LABELS and recompile." );
-                    System.exit(1);
-                }
-
-                result[y * w + x] = k;
-                // if connected, but with different label, then do union
-                if (x > 0 && image[y * w + x - 1]== image[y * w + x] && result[y * w + x - 1] != k)
-                	union(k, result[y * w + x - 1], parent );
-                if (y > 0 && image[(y - 1) * w + x] == image[y * w + x] && result[(y - 1) * w + x] != k)
-                	union(k, result[(y-1)*w+x], parent );
-            }
-        }
-
-        // Begin the second pass.  Assign the new labels
-        // if 0 is reserved for background, then the first available label is 1
-        nextLabel = 1;
-        for (int i = 0; i < w * h; i++ ) {
-            if (image[i] !=0 || !zeroAsBg) {
-                result[i] = find(result[i], parent, labels);
-                // The labels are from 1, if label 0 should be considered, then
-                // all the label should minus 1
-                if (!zeroAsBg)
-                	result[i]--;
-            }
-        }
-
-        nextLabel--;   // next_label records the max label
-        if (!zeroAsBg)
-        	nextLabel--;
-
-        System.out.println(nextLabel + " regions");
-
-        return result;
+    	Finder finder = new Finder(image, w, h);
+    	return finder.process();
     }
 
-    private void union(int x, int y, int[] parent)
-    {
-        while (parent[x] > 0) {
-            x = parent[x];
-        }
+	private static class Finder
+	{
+		private final int[] image;
+		private final int w;
+		private final int h;
 
-        while (parent[y] > 0) {
-            y = parent[y];
-        }
+		private int[] result;
 
-        if (x != y) {
-            if (x < y)
-                parent[x] = y;
-            else
-            	parent[y] = x;
-        }
-    }
+		private final UnionFind uf;
 
-    /**
-     * This function is called to return the root label
-     * Returned label starts from 1 because label array is inited to 0 as first
-     * [Effects]
-     *   label array records the new label for every root
-     */
-    private int find(int x, int[] parent, int[] label)
-    {
-        while (parent[x] > 0)
-        {
-            x = parent[x];
-        }
+		boolean zeroAsBg = true;		// HACK: is this needed?
+		public Finder(int[] image, int w, int h) {
+			this.image = image;
+			this.w = w;
+			this.h = h;
 
-        if (label[x] == 0)
-            label[x] = nextLabel++;
+			result = new int[w * h];
+			uf = new UnionFind(MAX_LABELS);
+		}
 
-        return label[x];
-    }
+		private int[] process() {
+			firstPass();
+			secondPass();
+
+			return result;
+		}
+
+		private void secondPass() {
+			int nextLabel = 1;
+	        for (int i = 0; i < w * h; i++ ) {
+	            if (image[i] !=0 || !zeroAsBg) {
+	                result[i] = uf.find(result[i]);
+	                // The labels are from 1, if label 0 should be considered, then
+	                // all the label should minus 1
+	                if (!zeroAsBg)
+	                	result[i]--;
+	            }
+	        }
+
+	        nextLabel--;   // next_label records the max label
+	        if (!zeroAsBg)
+	        	nextLabel--;
+
+	        System.out.println(nextLabel + " regions");
+		}
+
+		private void firstPass() {
+	        int yOffset = -w;
+	        for (int y = 0; y < h; ++y)
+	        {
+	        	yOffset += w;		// first element of the current row.
+	            for (int x = 0; x < w; ++x)
+	            {
+	            	int ix = yOffset + x;		// index for x,y
+	                int px = image[ix];			// the value of the pixel at x,y
+					if (px == 0 && zeroAsBg)
+	                	continue;		// don't label background pixels
+
+	                int k = 0;
+	                boolean connected = false;
+	                // if connected to the left
+	                if (x > 0 && image[ix - 1] == px) {
+	                   k = result[ix - 1];
+	                   connected = true;
+	                }
+
+	                // if connected to the up
+	                // TODO maybe handle first row separately
+	                int prexIx = (y - 1) * w + x;
+					if (y > 0 && image[prexIx] == px &&
+	                    (connected == false || image[prexIx] < k )) {
+	                    k = result[prexIx];
+	                    connected = true;
+	                }
+
+	                if (!connected)
+	                	k = uf.increment();
+
+	                if (k >= MAX_LABELS)
+	                	throw new IllegalStateException("maximum number of labels reached. increase MAX_LABELS and recompile.");
+
+	                result[ix] = k;
+	                // if connected, but with different label, then do union
+	                if (x > 0 && image[ix - 1]== px && result[ix - 1] != k)
+	                	uf.union(k, result[ix - 1]);
+	                if (y > 0 && image[prexIx] == px && result[prexIx] != k)
+	                	uf.union(k, result[prexIx]);
+	            }
+	        }
+		}
+	}
+
+    /***************************************************************************
+    *  Compilation:  javac WeightedQuickUnionUF.java
+    *  Execution:  java WeightedQuickUnionUF < input.txt
+    *  Dependencies: StdIn.java StdOut.java
+    *
+    *  Weighted quick-union (without path compression).
+    *
+    ****************************************************************************/
+
+   public static class UnionFind {
+       private final int[] id;    // id[i] = parent of i
+       private final int[] sz;    // sz[i] = number of objects in subtree rooted at i
+       private int count = 0;     // number of components
+       private int label = 0;
+
+       // Create an empty union find data structure with N isolated sets.
+       public UnionFind(int maxSize) {
+//           count = N;
+           id = new int[maxSize];
+           sz = new int[maxSize];
+//           for (int i = 0; i < N; i++) {
+//               id[i] = i;
+//               sz[i] = 1;
+//           }
+       }
+
+       int increment()
+       {
+    	   label++;
+    	   count++;
+    	   id[label] = label;
+    	   sz[label] = label;
+
+    	   return label;
+       }
+
+       // Return the number of disjoint sets.
+       public int count() {
+           return count;
+       }
+
+       // Return component identifier for component containing p
+       public int find(int p) {
+           while (p != id[p])
+               p = id[p];
+           return p;
+       }
+
+      // Are objects p and q in the same set?
+       public boolean connected(int p, int q) {
+           return find(p) == find(q);
+       }
+
+
+       // Replace sets containing p and q with their union.
+       public void union(int p, int q) {
+           int i = find(p);
+           int j = find(q);
+           if (i == j) return;
+
+           // make smaller root point to larger one
+           if   (sz[i] < sz[j]) {
+        	   id[i] = j;
+        	   sz[j] += sz[i];
+    	   } else {
+    		   id[j] = i;
+    		   sz[i] += sz[j];
+    	   }
+
+           count--;
+       }
+   }
 }
