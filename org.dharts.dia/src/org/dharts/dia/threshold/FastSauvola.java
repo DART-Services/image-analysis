@@ -40,7 +40,13 @@ public class FastSauvola implements Thresholder
 {
 	// TODO need to factor out the integral image concepts and tools from the thresholder 
 	private static final int N_THREADS = 10;		// default number of threads to use internally
+	private static final ColorConvertOp op = new ColorConvertOp(ColorSpace.getInstance(ColorSpace.CS_GRAY), null);
 	
+	// FIXME need to shut down executor service. We should probably think about starting up 
+	//       a Thresholder, configure it, use it to process multiple images and 
+	//	     then shut it down. The current architecture requires us to create, configure and 
+	//		 shutdown a lot of thresholder instances when the only thing that will change will 
+	//	     be the individual image being processed 
     private final ExecutorService ex;
 
     private int width  = 0;
@@ -81,7 +87,6 @@ public class FastSauvola implements Thresholder
 		initialize(ImageIO.read(file));
     }
 
-    private static final ColorConvertOp op = new ColorConvertOp(ColorSpace.getInstance(ColorSpace.CS_GRAY), null);
     @Override
     public void initialize(BufferedImage image) {
      	sourceImage = op.filter(image, null);
