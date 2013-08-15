@@ -16,8 +16,9 @@ limitations under the License.
 
 package com.jhlabs.composite;
 
-import java.awt.*;
-import java.awt.image.*;
+import java.awt.CompositeContext;
+import java.awt.RenderingHints;
+import java.awt.image.ColorModel;
 
 public final class SubtractComposite extends RGBComposite {
 
@@ -25,6 +26,7 @@ public final class SubtractComposite extends RGBComposite {
         super( alpha );
 	}
 
+	@Override
 	public CompositeContext createContext( ColorModel srcColorModel, ColorModel dstColorModel, RenderingHints hints ) {
 		return new Context( extraAlpha, srcColorModel, dstColorModel );
 	}
@@ -34,7 +36,8 @@ public final class SubtractComposite extends RGBComposite {
             super( alpha, srcColorModel, dstColorModel );
         }
 
-        public void composeRGB( int[] src, int[] dst, float alpha ) {
+        @Override
+		public void composeRGB( int[] src, int[] dst, float alpha ) {
             int w = src.length;
 
             for ( int i = 0; i < w; i += 4 ) {

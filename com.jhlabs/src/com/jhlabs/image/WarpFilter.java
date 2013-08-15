@@ -40,7 +40,7 @@ public class WarpFilter extends WholeImageFilter {
 	 */
 	public WarpFilter() {
 	}
-	
+
 	/**
 	 * Create a WarpFilter with two warp grids.
 	 * @param sourceGrid the source grid
@@ -48,9 +48,9 @@ public class WarpFilter extends WholeImageFilter {
 	 */
 	public WarpFilter(WarpGrid sourceGrid, WarpGrid destGrid) {
 		this.sourceGrid = sourceGrid;
-		this.destGrid = destGrid;		
+		this.destGrid = destGrid;
 	}
-	
+
 	/**
 	 * Set the source warp grid.
 	 * @param sourceGrid the source grid
@@ -121,8 +121,13 @@ public class WarpFilter extends WholeImageFilter {
 
 	@Override
 	protected int[] filterPixels( int width, int height, int[] inPixels, Rectangle transformedSpace ) {
+		return filterPixels(width, height, inPixels);
+	}
+
+	@Override
+	protected int[] filterPixels( int width, int height, int[] inPixels) {
 		int[] outPixels = new int[width * height];
-		
+
 		if ( morphImage != null ) {
 			int[] morphPixels = getRGB( morphImage, 0, 0, width, height, null );
 			morph( inPixels, morphPixels, outPixels, sourceGrid, destGrid, width, height, time );
@@ -157,7 +162,7 @@ public class WarpFilter extends WholeImageFilter {
 			}
 		}
 	}
-	
+
 	@Override
 	public String toString() {
 		return "Distort/Mesh Warp...";

@@ -17,6 +17,17 @@ limitations under the License.
 package com.jhlabs.math;
 
 public interface BinaryFunction {
+	// TODO rethink this. This seems a bit heavy-weight unless it is really being used
+	//		in an informed way. I can see uses for it, but I'm not sure it is really being used
+	//		or that the (presumed) performance degredation is worth this level of abstration.
+
+	/**
+	 * Indicates whether the supplied RGB value corresponds to a 'black' pixel in a
+	 * binary image.
+	 *
+	 * @param rgb The RGB value of the pixel.
+	 * @return {@code true} if this pixel value should be interpreted as being 'black'.
+	 */
 	public boolean isBlack(int rgb);
 }
 

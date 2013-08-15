@@ -23,16 +23,16 @@ public class Tuple3f {
 	public float x, y, z;
 
 	public Tuple3f() {
-		this( 0, 0, 0 );
+		this(0, 0, 0);
 	}
 	
-	public Tuple3f( float[] x ) {
+	public Tuple3f(float[] x) {
 		this.x = x[0];
 		this.y = x[1];
 		this.z = x[2];
 	}
 
-	public Tuple3f( float x, float y, float z ) {
+	public Tuple3f(float x, float y, float z) {
 		this.x = x;
 		this.y = y;
 		this.z = z;
@@ -162,6 +162,7 @@ public class Tuple3f {
 		z = s*t1.z + t2.z;
 	}
 	
+	@Override
 	public String toString() {
 		return "["+x+", "+y+", "+z+"]";
 	}

@@ -1,20 +1,20 @@
 /*
  * Copyright 2006 Jerry Huxtable
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  * With revisions by Neal Audenaert (neal@idch.org)
- * Copyright 2013 Digital Archives, Reserach & Technology Services 
+ * Copyright 2013 Digital Archives, Reserach & Technology Services
  */
 
 package com.jhlabs.image;
@@ -37,22 +37,21 @@ public abstract class AbstractBufferedImageOp implements BufferedImageOp, Clonea
     public BufferedImage createCompatibleDestImage(BufferedImage src, ColorModel dstCM) {
         if (dstCM == null)
             dstCM = src.getColorModel();
-        
-        
+
         WritableRaster raster = dstCM.createCompatibleWritableRaster(src.getWidth(), src.getHeight());
 		return new BufferedImage(dstCM, raster, dstCM.isAlphaPremultiplied(), null);
     }
-    
+
 	@Override
     public Rectangle2D getBounds2D(BufferedImage src) {
         return new Rectangle(0, 0, src.getWidth(), src.getHeight());
     }
-    
+
 	@Override
     public Point2D getPoint2D(Point2D srcPt, Point2D dstPt) {
         if (dstPt == null)
             dstPt = new Point2D.Double();
-        
+
         dstPt.setLocation(srcPt.getX(), srcPt.getY());
         return dstPt;
     }
@@ -63,10 +62,10 @@ public abstract class AbstractBufferedImageOp implements BufferedImageOp, Clonea
     }
 
 	/**
-	 * A convenience method for getting ARGB pixels from an image. This tries to avoid the 
-	 * performance penalty of {@link BufferedImage#getRGB(int, int, int, int, int[], int, int)} 
+	 * A convenience method for getting ARGB pixels from an image. This tries to avoid the
+	 * performance penalty of {@link BufferedImage#getRGB(int, int, int, int, int[], int, int)}
 	 * unmanaging the image.
-	 * 
+	 *
      * @param image   a BufferedImage object
      * @param x       the left edge of the pixel block
      * @param y       the right edge of the pixel block
@@ -84,15 +83,15 @@ public abstract class AbstractBufferedImageOp implements BufferedImageOp, Clonea
 			WritableRaster raster = image.getRaster();
 			return (int[])raster.getDataElements(x, y, width, height, pixels);
 		}
-		
+
 		return image.getRGB(x, y, width, height, pixels, 0, width );
     }
 
 	/**
-	 * A convenience method for setting ARGB pixels in an image. This tries to avoid the 
-	 * performance penalty of {@link BufferedImage#setRGB(int, int, int, int, int[], int, int)} 
+	 * A convenience method for setting ARGB pixels in an image. This tries to avoid the
+	 * performance penalty of {@link BufferedImage#setRGB(int, int, int, int, int[], int, int)}
 	 * unmanaging the image.
-	 * 
+	 *
      * @param image   a BufferedImage object
      * @param x       the left edge of the pixel block
      * @param y       the right edge of the pixel block
@@ -109,6 +108,7 @@ public abstract class AbstractBufferedImageOp implements BufferedImageOp, Clonea
 			image.setRGB( x, y, width, height, pixels, 0, width );
     }
 
+	@Override
 	public Object clone() {
 		// FIXME DANGER!! Is this required?
 		try {
