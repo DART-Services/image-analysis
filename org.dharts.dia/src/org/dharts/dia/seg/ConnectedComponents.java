@@ -1,5 +1,9 @@
 package org.dharts.dia.seg;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 
 /**
  * Use row-by-row labeling algorithm to label connected components
@@ -15,7 +19,7 @@ package org.dharts.dia.seg;
  */
 public class ConnectedComponents
 {
-    final static int MAX_LABELS = 8000000;
+    final static int MAX_LABELS = 100_000;
 //    int nextLabel = 1;
 //    private final UnionFind uf = new UnionFind(MAX_LABELS);
 
@@ -64,10 +68,38 @@ public class ConnectedComponents
      * @param d dimension of the data
      * @param zeroAsBg label 0 is treated as background, so be ignored
      */
-    public int[] labeling(int[] image, int w, int h, boolean zeroAsBg)
+    public int[] labeling(int[] image, int w, int h)
     {
     	Finder finder = new Finder(image, w, h);
     	return finder.process();
+    }
+
+    public Collection<ConnectedComponent> findCCs(int[] image, int w, int h)
+    {
+    	Map<Integer, ConnectedComponent> components = new HashMap<>();
+    	int offset = 0;
+    	int[] labels = labeling(image, w, h);
+    	for (int r = 0; r < h; r++)
+    	{
+    		for (int c = 0; c < w; c++)
+    		{
+    			int label = labels[offset + c];
+    			if (label == 0)
+    				continue;
+
+    			Integer l = Integer.valueOf(label);
+				if (!components.containsKey(l))
+				{
+					components.put(l, new ConnectedComponent());
+				}
+
+				components.get(l).add(c, r);
+    		}
+
+    		offset += w;
+    	}
+
+    	return components.values();
     }
 
 	private static class Finder
@@ -97,25 +129,6 @@ public class ConnectedComponents
 			return result;
 		}
 
-		private void secondPass() {
-			int nextLabel = 1;
-	        for (int i = 0; i < w * h; i++ ) {
-	            if (image[i] !=0 || !zeroAsBg) {
-	                result[i] = uf.find(result[i]);
-	                // The labels are from 1, if label 0 should be considered, then
-	                // all the label should minus 1
-	                if (!zeroAsBg)
-	                	result[i]--;
-	            }
-	        }
-
-	        nextLabel--;   // next_label records the max label
-	        if (!zeroAsBg)
-	        	nextLabel--;
-
-	        System.out.println(nextLabel + " regions");
-		}
-
 		private void firstPass() {
 	        int yOffset = -w;
 	        for (int y = 0; y < h; ++y)
@@ -137,10 +150,9 @@ public class ConnectedComponents
 	                }
 
 	                // if connected to the up
-	                // TODO maybe handle first row separately
 	                int prexIx = (y - 1) * w + x;
 					if (y > 0 && image[prexIx] == px &&
-	                    (connected == false || image[prexIx] < k )) {
+	                    (connected == false || result[prexIx] < k )) {
 	                    k = result[prexIx];
 	                    connected = true;
 	                }
@@ -159,6 +171,25 @@ public class ConnectedComponents
 	                	uf.union(k, result[prexIx]);
 	            }
 	        }
+		}
+
+		private void secondPass() {
+			int nextLabel = 1;
+		    for (int i = 0; i < w * h; i++ ) {
+		        if (image[i] !=0 || !zeroAsBg) {
+		            result[i] = uf.find(result[i]);
+		            // The labels are from 1, if label 0 should be considered, then
+		            // all the label should minus 1
+		            if (!zeroAsBg)
+		            	result[i]--;
+		        }
+		    }
+
+		    nextLabel--;   // next_label records the max label
+		    if (!zeroAsBg)
+		    	nextLabel--;
+
+		    System.out.println(nextLabel + " regions");
 		}
 	}
 
@@ -179,13 +210,8 @@ public class ConnectedComponents
 
        // Create an empty union find data structure with N isolated sets.
        public UnionFind(int maxSize) {
-//           count = N;
            id = new int[maxSize];
            sz = new int[maxSize];
-//           for (int i = 0; i < N; i++) {
-//               id[i] = i;
-//               sz[i] = 1;
-//           }
        }
 
        int increment()
