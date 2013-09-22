@@ -108,6 +108,7 @@ public class FastSauvola implements Thresholder
     	ex = Executors.newFixedThreadPool(nThreads);
     }
 
+    // HACK: post construction initialization is a well recognized anti-pattern
     @Override
 	public void initialize(File file) throws IOException {
 		if (!file.exists() || !file.isFile() || !file.canRead()) {

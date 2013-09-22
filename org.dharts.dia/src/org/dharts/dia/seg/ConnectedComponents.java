@@ -188,8 +188,6 @@ public class ConnectedComponents
 		    nextLabel--;   // next_label records the max label
 		    if (!zeroAsBg)
 		    	nextLabel--;
-
-		    System.out.println(nextLabel + " regions");
 		}
 	}
 
