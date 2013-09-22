@@ -16,7 +16,7 @@ limitations under the License.
 
 package com.jhlabs.math;
 
-import java.util.*;
+import java.util.Random;
 
 /**
  * Perlin Noise functions
@@ -24,19 +24,22 @@ import java.util.*;
 public class Noise implements Function1D, Function2D, Function3D {
 
 	private static Random randomGenerator = new Random();
-	
+
+	@Override
 	public float evaluate(float x) {
 		return noise1(x);
 	}
-	
+
+	@Override
 	public float evaluate(float x, float y) {
 		return noise2(x, y);
 	}
-	
+
+	@Override
 	public float evaluate(float x, float y, float z) {
 		return noise3(x, y, z);
 	}
-	
+
 	/**
 	 * Compute turbulence using Perlin noise.
 	 * @param x the x value
@@ -80,7 +83,7 @@ public class Noise implements Function1D, Function2D, Function3D {
 	private static float sCurve(float t) {
 		return t * t * (3.0f - 2.0f * t);
 	}
-	
+
 	/**
 	 * Compute 1-dimensional Perlin noise.
 	 * @param x the x value
@@ -129,13 +132,13 @@ public class Noise implements Function1D, Function2D, Function3D {
 		bx1 = (bx0+1) & BM;
 		rx0 = t - (int)t;
 		rx1 = rx0 - 1.0f;
-	
+
 		t = y + N;
 		by0 = ((int)t) & BM;
 		by1 = (by0+1) & BM;
 		ry0 = t - (int)t;
 		ry1 = ry0 - 1.0f;
-	
+
 		i = p[bx0];
 		j = p[bx1];
 
@@ -186,13 +189,13 @@ public class Noise implements Function1D, Function2D, Function3D {
 		by1 = (by0+1) & BM;
 		ry0 = t - (int)t;
 		ry1 = ry0 - 1.0f;
-	
+
 		t = z + N;
 		bz0 = ((int)t) & BM;
 		bz1 = (bz0+1) & BM;
 		rz0 = t - (int)t;
 		rz1 = rz0 - 1.0f;
-	
+
 		i = p[bx0];
 		j = p[bx1];
 
@@ -248,7 +251,7 @@ public class Noise implements Function1D, Function2D, Function3D {
 	private static int random() {
 		return randomGenerator.nextInt() & 0x7fffffff;
 	}
-	
+
 	private static void init() {
 		int i, j, k;
 
@@ -301,7 +304,7 @@ public class Noise implements Function1D, Function2D, Function3D {
 		minmax[1] = max;
 		return minmax;
 	}
-	
+
 	/**
 	 * Returns the minimum and maximum of a number of random values
 	 * of the given function. This is useful for making some stab at
@@ -323,5 +326,5 @@ public class Noise implements Function1D, Function2D, Function3D {
 		minmax[1] = max;
 		return minmax;
 	}
-	
+
 }
